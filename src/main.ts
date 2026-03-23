@@ -38,7 +38,7 @@ const playhead = createPlayhead(
   (x) => renderer.setPlayheadPosition(x >= 0 ? x : null),
 );
 
-const controls = initControls({
+const { state: controls, setMode } = initControls({
   onModeChange(mode: AudioMode) {
     if (mode === 'playhead') {
       playhead.start();
@@ -110,4 +110,29 @@ window.addEventListener('resize', () => renderer.resize());
 
 initDebugPanel((v) => {
   getMasterOutput().gain.value = v;
+});
+
+// Keyboard shortcuts
+window.addEventListener('keydown', (e) => {
+  // Ignore when typing in an input
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+  switch (e.code) {
+    case 'Space':
+      e.preventDefault();
+      setMode(controls.audioMode === 'live' ? 'playhead' : 'live');
+      break;
+    case 'Escape':
+      setMode('live');
+      break;
+    case 'Delete':
+    case 'Backspace':
+      e.preventDefault();
+      playhead.stop();
+      painting = { ...painting, strokes: [] };
+      activeStrokes.clear();
+      renderer.clear();
+      setMode('live');
+      break;
+  }
 });

@@ -64,6 +64,12 @@ function strokeSpeed(prev: StrokePoint, curr: StrokePoint): number {
   return Math.sqrt(dx * dx + dy * dy) / dt;
 }
 
+// Velocity-based width multiplier: fast = thin, slow = thick
+function velocityWidthMul(prev: StrokePoint, curr: StrokePoint): number {
+  const speed = strokeSpeed(prev, curr);
+  return clamp(lerp(1.3, 0.4, speed * 600), 0.4, 1.3);
+}
+
 // Seeded-ish random from two floats, for deterministic bristle placement
 function pseudoRand(a: number, b: number): number {
   const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
@@ -72,7 +78,8 @@ function pseudoRand(a: number, b: number): number {
 
 const oilFlat: BrushRenderer = (rc, prev, curr, _state) => {
   const { ctx, color, canvasWidth, canvasHeight } = rc;
-  const baseWidth = lerp(12, 30, curr.pressure) * (canvasWidth / 960);
+  const velMul = velocityWidthMul(prev, curr);
+  const baseWidth = lerp(12, 30, curr.pressure) * velMul * (canvasWidth / 960);
   const angle = strokeAngle(prev, curr);
   const perpX = Math.cos(angle + Math.PI / 2);
   const perpY = Math.sin(angle + Math.PI / 2);
@@ -100,10 +107,11 @@ const oilFlat: BrushRenderer = (rc, prev, curr, _state) => {
   }
 };
 
-const oilRound: BrushRenderer = (rc, _prev, curr, state) => {
+const oilRound: BrushRenderer = (rc, prev, curr, state) => {
   const { ctx, color, canvasWidth, canvasHeight } = rc;
-  const scale = canvasWidth / 960;
-  const baseRadius = lerp(8, 22, curr.pressure) * scale;
+  const sc = canvasWidth / 960;
+  const velMul = velocityWidthMul(prev, curr);
+  const baseRadius = lerp(8, 22, curr.pressure) * velMul * sc;
   // Bristles splay outward under pressure
   const splay = lerp(0.3, 1.0, curr.pressure);
   const cx = curr.x * canvasWidth;
@@ -120,7 +128,7 @@ const oilRound: BrushRenderer = (rc, _prev, curr, state) => {
 
     ctx.beginPath();
     ctx.strokeStyle = rgbStr(color, alpha);
-    ctx.lineWidth = bristle.thickness * scale;
+    ctx.lineWidth = bristle.thickness * sc;
     ctx.lineCap = 'round';
 
     if (bristle.prevX < 0) {
@@ -144,7 +152,8 @@ const oilRound: BrushRenderer = (rc, _prev, curr, state) => {
 const paletteKnife: BrushRenderer = (rc, prev, curr, _state) => {
   const { ctx, color, canvasWidth, canvasHeight } = rc;
   const speed = strokeSpeed(prev, curr);
-  const width = lerp(20, 50, curr.pressure) * (canvasWidth / 960);
+  const velMul = velocityWidthMul(prev, curr);
+  const width = lerp(20, 50, curr.pressure) * velMul * (canvasWidth / 960);
   const angle = strokeAngle(prev, curr);
   const stretch = Math.min(speed * 800, 2.5);
   const perpX = Math.cos(angle + Math.PI / 2);
@@ -197,7 +206,8 @@ const paletteKnife: BrushRenderer = (rc, prev, curr, _state) => {
 
 const dryBrush: BrushRenderer = (rc, prev, curr, _state) => {
   const { ctx, color, canvasWidth, canvasHeight } = rc;
-  const baseWidth = lerp(10, 35, curr.pressure) * (canvasWidth / 960);
+  const velMul = velocityWidthMul(prev, curr);
+  const baseWidth = lerp(10, 35, curr.pressure) * velMul * (canvasWidth / 960);
   const angle = strokeAngle(prev, curr);
   const perpX = Math.cos(angle + Math.PI / 2);
   const perpY = Math.sin(angle + Math.PI / 2);
@@ -325,6 +335,8 @@ const BRUSH_RENDERERS: Record<BrushType, BrushRenderer> = {
   'solvent': solvent,
 };
 
+const ERASER_BRUSHES: ReadonlySet<BrushType> = new Set(['scraper', 'solvent']);
+
 export function renderSegment(
   brush: BrushType,
   rc: BrushRenderContext,
@@ -332,5 +344,14 @@ export function renderSegment(
   curr: StrokePoint,
   state: BrushState,
 ): void {
-  BRUSH_RENDERERS[brush](rc, prev, curr, state);
+  const { ctx } = rc;
+  // Paint brushes use multiply so overlapping strokes darken like pigment
+  if (!ERASER_BRUSHES.has(brush)) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'multiply';
+    BRUSH_RENDERERS[brush](rc, prev, curr, state);
+    ctx.restore();
+  } else {
+    BRUSH_RENDERERS[brush](rc, prev, curr, state);
+  }
 }

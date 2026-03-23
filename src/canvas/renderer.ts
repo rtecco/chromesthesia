@@ -11,12 +11,31 @@ export type CanvasRenderer = {
   setPlayheadPosition: (x: number | null) => void;
 };
 
+function createGrainPattern(w: number, h: number): HTMLCanvasElement {
+  const grain = document.createElement('canvas');
+  grain.width = w;
+  grain.height = h;
+  const gCtx = grain.getContext('2d')!;
+  const imgData = gCtx.createImageData(w, h);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = 245 + Math.random() * 10; // very subtle: 245-255 range
+    d[i] = v;
+    d[i + 1] = v;
+    d[i + 2] = v;
+    d[i + 3] = 30; // low alpha — just a hint of texture
+  }
+  gCtx.putImageData(imgData, 0, 0);
+  return grain;
+}
+
 export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
   const ctx = canvas.getContext('2d')!;
   const bufferCanvas = document.createElement('canvas');
   const bufferCtx = bufferCanvas.getContext('2d')!;
 
   let playheadX: number | null = null;
+  let grainCanvas: HTMLCanvasElement | null = null;
 
   function syncSize() {
     const dpr = window.devicePixelRatio || 1;
@@ -41,11 +60,19 @@ export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
       if (tmpCanvas.width > 0 && tmpCanvas.height > 0) {
         bufferCtx.drawImage(tmpCanvas, 0, 0, w, h);
       }
+
+      grainCanvas = createGrainPattern(w, h);
     }
   }
 
   function compositeFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw canvas grain texture under the paint
+    if (grainCanvas) {
+      ctx.drawImage(grainCanvas, 0, 0);
+    }
+
     ctx.drawImage(bufferCanvas, 0, 0);
 
     // Draw playhead

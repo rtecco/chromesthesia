@@ -32,7 +32,7 @@ function isEraserTool(brush: BrushType): boolean {
   return brush === 'scraper' || brush === 'solvent';
 }
 
-export function initControls(callbacks: ControlCallbacks): ControlState {
+export function initControls(callbacks: ControlCallbacks): { state: ControlState; setMode: (mode: AudioMode) => void } {
   const palette = createPalette();
 
   const state: ControlState = {
@@ -181,5 +181,5 @@ export function initControls(callbacks: ControlCallbacks): ControlState {
     setMode('live');
   });
 
-  return state;
+  return { state, setMode };
 }
