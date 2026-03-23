@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound Painter</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <div class="toolbar-group" id="color-picker"></div>
+        <div class="toolbar-group" id="brush-picker"></div>
+        <div class="toolbar-group controls">
+          <button id="btn-play" type="button">Play</button>
+          <button id="btn-stop" type="button">Stop</button>
+          <button id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
