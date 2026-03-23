@@ -36,9 +36,9 @@ export function initStrokeRecorder(
 
     const id = crypto.randomUUID();
     const startTime = performance.now();
-    const point = normalizePoint({ ...e, pressure: e.pressure } as PointerEvent);
-
-    activeStroke = { id, startTime, points: [point] };
+    activeStroke = { id, startTime, points: [] };
+    const point = normalizePoint(e);
+    activeStroke.points.push(point);
 
     const stroke: Stroke = {
       id,

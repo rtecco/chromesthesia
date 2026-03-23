@@ -1,10 +1,15 @@
-import type { Painting, Stroke, StrokePoint } from './types';
+import type { BrushType, EraserTool, Painting, Stroke, StrokePoint } from './types';
 import { createRenderer } from './canvas/renderer';
 import { createBrushState, type BrushState } from './canvas/brushes';
 import { initStrokeRecorder } from './canvas/stroke-recorder';
 import { initControls } from './ui/controls';
+import { ensureResumed } from './audio/engine';
+import { createVoice, type Voice } from './audio/voices';
+import { voiceParamsFromColor, positionMod } from './audio/mappings';
+import { getEffectChain } from './audio/effects';
 
 const LOOP_LENGTH_MS = 4000;
+const ERASERS: ReadonlySet<BrushType> = new Set<EraserTool>(['scraper', 'solvent']);
 
 let painting: Painting = {
   version: 1,
@@ -13,8 +18,14 @@ let painting: Painting = {
   strokes: [],
 };
 
-// Active strokes being drawn (mutable during recording, frozen on end)
-const activeStrokes = new Map<string, { stroke: Stroke; points: StrokePoint[]; brushState: BrushState }>();
+type ActiveStroke = {
+  stroke: Stroke;
+  points: StrokePoint[];
+  brushState: BrushState;
+  voice: Voice | null;
+};
+
+const activeStrokes = new Map<string, ActiveStroke>();
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const renderer = createRenderer(canvas);
@@ -39,7 +50,19 @@ initStrokeRecorder(canvas, {
 
   onStrokeStart(stroke: Stroke) {
     const brushState = createBrushState(stroke.brush);
-    activeStrokes.set(stroke.id, { stroke, points: [...stroke.points], brushState });
+    let voice: Voice | null = null;
+
+    // Only create sound for paint brushes, not erasers
+    if (!ERASERS.has(stroke.brush)) {
+      void ensureResumed();
+      const params = voiceParamsFromColor(stroke.color);
+      const mod = positionMod(stroke.points[0]);
+      voice = createVoice(params, mod, 0.5);
+      const chain = getEffectChain(stroke.brush);
+      voice.output.connect(chain.input);
+    }
+
+    activeStrokes.set(stroke.id, { stroke, points: [...stroke.points], brushState, voice });
   },
 
   onStrokePoint(strokeId: string, point: StrokePoint) {
@@ -49,11 +72,22 @@ initStrokeRecorder(canvas, {
     const prev = entry.points[entry.points.length - 1];
     entry.points.push(point);
     renderer.drawSegment(entry.stroke, prev, point, entry.brushState);
+
+    // Update voice with new position
+    if (entry.voice) {
+      const mod = positionMod(point);
+      entry.voice.updatePosition(mod);
+    }
   },
 
   onStrokeEnd(strokeId: string) {
     const entry = activeStrokes.get(strokeId);
     if (!entry) return;
+
+    // Release the voice
+    if (entry.voice) {
+      entry.voice.stop();
+    }
 
     const finishedStroke: Stroke = {
       ...entry.stroke,
