@@ -9,10 +9,17 @@ const ERASERS: ReadonlySet<BrushType> = new Set<EraserTool>(['scraper', 'solvent
 const LOOKAHEAD_MS = 80;
 const SCHEDULE_INTERVAL_MS = 30;
 
+export type ActiveReplayStroke = {
+  points: readonly StrokePoint[];
+  color: PaletteColor;
+  progress: number; // 0..1 how far through the stroke
+};
+
 export type Playhead = {
   start: () => void;
   stop: () => void;
   isPlaying: () => boolean;
+  getActiveStrokes: () => ActiveReplayStroke[];
 };
 
 /**
@@ -225,5 +232,19 @@ export function createPlayhead(
     },
 
     isPlaying: () => playing,
+
+    getActiveStrokes(): ActiveReplayStroke[] {
+      if (!playing) return [];
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+      const result: ActiveReplayStroke[] = [];
+      for (const av of activeVoices) {
+        const elapsed = now - av.voiceStartTime;
+        if (elapsed < 0) continue;
+        const progress = Math.min(elapsed / av.ss.duration, 1);
+        result.push({ points: av.ss.points, color: av.ss.color, progress });
+      }
+      return result;
+    },
   };
 }

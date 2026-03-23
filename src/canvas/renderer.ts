@@ -1,5 +1,11 @@
-import type { Stroke, StrokePoint } from '../types';
+import type { PaletteColor, Stroke, StrokePoint } from '../types';
 import { renderSegment, type BrushRenderContext, type BrushState } from './brushes';
+
+export type ShimmerStroke = {
+  points: readonly StrokePoint[];
+  color: PaletteColor;
+  progress: number;
+};
 
 export type CanvasRenderer = {
   readonly canvas: HTMLCanvasElement;
@@ -7,8 +13,7 @@ export type CanvasRenderer = {
   clear: () => void;
   drawSegment: (stroke: Stroke, prev: StrokePoint, curr: StrokePoint, brushState: BrushState) => void;
   resize: () => void;
-  getPlayheadPosition: () => number | null;
-  setPlayheadPosition: (x: number | null) => void;
+  setShimmerStrokes: (strokes: ShimmerStroke[]) => void;
 };
 
 function createGrainPattern(w: number, h: number): HTMLCanvasElement {
@@ -34,7 +39,7 @@ export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
   const bufferCanvas = document.createElement('canvas');
   const bufferCtx = bufferCanvas.getContext('2d')!;
 
-  let playheadX: number | null = null;
+  let shimmerStrokes: ShimmerStroke[] = [];
   let grainCanvas: HTMLCanvasElement | null = null;
 
   function syncSize() {
@@ -75,17 +80,47 @@ export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
 
     ctx.drawImage(bufferCanvas, 0, 0);
 
-    // Draw playhead
-    if (playheadX !== null) {
-      const px = playheadX * canvas.width;
+    // Draw shimmer on active replay strokes
+    if (shimmerStrokes.length > 0) {
+      const t = performance.now() / 1000;
       ctx.save();
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      ctx.moveTo(px, 0);
-      ctx.lineTo(px, canvas.height);
-      ctx.stroke();
+      for (const ss of shimmerStrokes) {
+        if (ss.points.length < 2) continue;
+        const [r, g, b] = ss.color.rgb;
+        // Pulsing glow: oscillates alpha between 0.2 and 0.5
+        const pulse = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(t * 8));
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Draw the stroke path as a wide, glowing line
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        // White outer glow
+        ctx.strokeStyle = `rgba(255, 255, 255, ${pulse * 0.7})`;
+        const lastIdx = Math.floor(ss.progress * (ss.points.length - 1));
+        ctx.beginPath();
+        ctx.moveTo(ss.points[0].x * w, ss.points[0].y * h);
+        for (let i = 1; i <= lastIdx; i++) {
+          ctx.lineTo(ss.points[i].x * w, ss.points[i].y * h);
+        }
+        ctx.stroke();
+
+        // Colored inner line (reuse same path)
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
+        ctx.stroke();
+
+        // Brighter dot at the leading edge
+        if (lastIdx >= 0) {
+          const tip = ss.points[lastIdx];
+          const dotPulse = 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(t * 12));
+          ctx.fillStyle = `rgba(255, 255, 255, ${dotPulse})`;
+          ctx.beginPath();
+          ctx.arc(tip.x * w, tip.y * h, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
       ctx.restore();
     }
 
@@ -117,12 +152,8 @@ export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
       syncSize();
     },
 
-    getPlayheadPosition() {
-      return playheadX;
-    },
-
-    setPlayheadPosition(x: number | null) {
-      playheadX = x;
+    setShimmerStrokes(strokes: ShimmerStroke[]) {
+      shimmerStrokes = strokes;
     },
   };
 }

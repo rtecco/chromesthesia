@@ -1,4 +1,4 @@
-# Chromesthesia — Implementation Plan
+# Sound Painter — Implementation Plan
 
 ## Context
 
@@ -127,7 +127,6 @@ src/
 ### Stage 7: Deploy (branch: `stage-7-deploy`)
 - GitHub Actions workflow for Pages deployment
 - Merge all branches to `main`
-- Meta tags for social sharing
 - Mobile touch verification
 - Performance audit (60fps canvas, glitch-free audio)
 - Push to GitHub

@@ -35,6 +35,19 @@ const renderer = createRenderer(canvas);
 
 const playhead = createPlayhead(() => painting);
 
+// Feed active replay strokes to renderer for shimmer effect
+function updateShimmer() {
+  renderer.setShimmerStrokes(
+    playhead.getActiveStrokes().map((s) => ({
+      points: s.points,
+      color: s.color,
+      progress: s.progress,
+    })),
+  );
+  requestAnimationFrame(updateShimmer);
+}
+requestAnimationFrame(updateShimmer);
+
 const { state: controls, setMode } = initControls({
   onModeChange(mode: AudioMode) {
     canvas.classList.toggle('input-disabled', mode === 'playhead');
