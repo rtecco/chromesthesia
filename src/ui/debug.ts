@@ -13,8 +13,18 @@ export type DebugParams = {
   noiseMax: number;           // max noise amount at full warmth*saturation
   peakGain: number;
 
-  // Playhead
-  voiceOverlap: number;       // column duration multiplier
+  // Color → tone
+  filterFreqMin: number;      // base filter freq at coolest hue
+  filterFreqMax: number;      // base filter freq at warmest hue
+  filterQMin: number;         // filter Q at lowest saturation
+  filterQMax: number;         // filter Q at highest saturation
+  attackMin: number;          // fastest attack (high saturation)
+  attackMax: number;          // slowest attack (low saturation)
+  releaseMin: number;         // fastest release (warm hue)
+  releaseMax: number;         // slowest release (cool hue)
+
+  // Replay
+  voiceOverlap: number;       // duration multiplier
   maxVoices: number;
 
   // Master
@@ -32,6 +42,14 @@ export const debugParams: DebugParams = {
   detuneMax: 25,
   noiseMax: 0.25,
   peakGain: 0.2,
+  filterFreqMin: 400,
+  filterFreqMax: 3000,
+  filterQMin: 0.5,
+  filterQMax: 8,
+  attackMin: 0.01,
+  attackMax: 0.08,
+  releaseMin: 0.05,
+  releaseMax: 0.3,
   voiceOverlap: 1.1,
   maxVoices: 16,
   masterGain: 0.7,
@@ -59,6 +77,14 @@ const SLIDERS: SliderDef[] = [
   { key: 'baseFreqMax', label: 'Base Freq Max', min: 200, max: 2000, step: 20 },
   { key: 'detuneMax', label: 'Detune Max (cents)', min: 0, max: 50, step: 1 },
   { key: 'noiseMax', label: 'Noise Max', min: 0, max: 0.5, step: 0.01 },
+  { key: 'filterFreqMin', label: 'Tone Filter Lo', min: 100, max: 2000, step: 50 },
+  { key: 'filterFreqMax', label: 'Tone Filter Hi', min: 500, max: 8000, step: 100 },
+  { key: 'filterQMin', label: 'Tone Q Min', min: 0.1, max: 5, step: 0.1 },
+  { key: 'filterQMax', label: 'Tone Q Max', min: 1, max: 20, step: 0.5 },
+  { key: 'attackMin', label: 'Attack Fast', min: 0.001, max: 0.05, step: 0.001 },
+  { key: 'attackMax', label: 'Attack Slow', min: 0.02, max: 0.3, step: 0.01 },
+  { key: 'releaseMin', label: 'Release Fast', min: 0.01, max: 0.2, step: 0.01 },
+  { key: 'releaseMax', label: 'Release Slow', min: 0.05, max: 1.0, step: 0.05 },
 ];
 
 export function initDebugPanel(onMasterGainChange: (v: number) => void): void {

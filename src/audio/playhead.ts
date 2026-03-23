@@ -100,7 +100,7 @@ export function createPlayhead(
       if (erasedFraction(originalIdx, allStrokes) > 0.5) continue;
 
       const pts = stroke.points;
-      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 200) / 1000;
       items.push({
         color: stroke.color,
         brush: stroke.brush,

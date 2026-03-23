@@ -48,8 +48,8 @@ export function voiceParamsFromColor(color: PaletteColor): VoiceParams {
 
   // Hue + saturation → filter character
   const filterType: BiquadFilterType = warmth > 0.5 ? 'highpass' : warmth > 0.2 ? 'bandpass' : 'lowpass';
-  const filterFreq = lerp(400, 3000, warmth) * lerp(0.6, 1.4, l / 100);
-  const filterQ = lerp(0.5, 8, richness);
+  const filterFreq = lerp(debugParams.filterFreqMin, debugParams.filterFreqMax, warmth) * lerp(0.6, 1.4, l / 100);
+  const filterQ = lerp(debugParams.filterQMin, debugParams.filterQMax, richness);
 
   // Noise: more for warm/saturated, less for cool/pure
   const noiseAmount = lerp(0.02, debugParams.noiseMax, warmth * richness);
@@ -61,8 +61,8 @@ export function voiceParamsFromColor(color: PaletteColor): VoiceParams {
     filterFreq,
     filterQ,
     noiseAmount,
-    attackTime: lerp(0.01, 0.08, 1 - richness),
-    releaseTime: lerp(0.05, 0.3, 1 - warmth),
+    attackTime: lerp(debugParams.attackMin, debugParams.attackMax, 1 - richness),
+    releaseTime: lerp(debugParams.releaseMin, debugParams.releaseMax, 1 - warmth),
   };
 }
 
