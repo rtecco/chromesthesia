@@ -12,6 +12,7 @@ export type StrokeRecorderCallbacks = {
   onStrokeEnd: (strokeId: string) => void;
   getActiveColor: () => PaletteColor | null;
   getActiveBrush: () => BrushType;
+  isInputDisabled: () => boolean;
 };
 
 export function initStrokeRecorder(
@@ -31,7 +32,7 @@ export function initStrokeRecorder(
   }
 
   function onPointerDown(e: PointerEvent) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || callbacks.isInputDisabled()) return;
     canvas.setPointerCapture(e.pointerId);
 
     const id = crypto.randomUUID();

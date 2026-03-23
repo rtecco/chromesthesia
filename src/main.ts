@@ -37,6 +37,7 @@ const playhead = createPlayhead(() => painting);
 
 const { state: controls, setMode } = initControls({
   onModeChange(mode: AudioMode) {
+    canvas.classList.toggle('input-disabled', mode === 'playhead');
     if (mode === 'playhead') {
       playhead.start();
     } else {
@@ -54,6 +55,7 @@ const { state: controls, setMode } = initControls({
 initStrokeRecorder(canvas, {
   getActiveColor: () => controls.activeColor,
   getActiveBrush: () => controls.activeBrush,
+  isInputDisabled: () => controls.audioMode === 'playhead',
 
   onStrokeStart(stroke: Stroke) {
     const brushState = createBrushState(stroke.brush);

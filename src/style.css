@@ -48,6 +48,10 @@ body {
   touch-action: none;
 }
 
+#canvas.input-disabled {
+  cursor: not-allowed;
+}
+
 button {
   padding: 6px 14px;
   border: 1px solid #ccc;

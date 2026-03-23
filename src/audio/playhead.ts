@@ -48,17 +48,57 @@ export function createPlayhead(
   };
   const activeVoices: ActiveStrokeVoice[] = [];
 
+  // Check what fraction of a stroke's points have been erased
+  function erasedFraction(
+    strokeIdx: number,
+    allStrokes: readonly { brush: BrushType; points: readonly StrokePoint[] }[],
+  ): number {
+    const stroke = allStrokes[strokeIdx];
+    const RADIUS = 0.04; // normalized distance threshold
+    const rSq = RADIUS * RADIUS;
+
+    // Collect all eraser points from strokes painted AFTER this one
+    const eraserPoints: StrokePoint[] = [];
+    for (let i = strokeIdx + 1; i < allStrokes.length; i++) {
+      if (ERASERS.has(allStrokes[i].brush)) {
+        for (const pt of allStrokes[i].points) {
+          eraserPoints.push(pt);
+        }
+      }
+    }
+    if (eraserPoints.length === 0) return 0;
+
+    let erased = 0;
+    for (const pt of stroke.points) {
+      for (const ep of eraserPoints) {
+        const dx = pt.x - ep.x;
+        const dy = pt.y - ep.y;
+        if (dx * dx + dy * dy < rSq) {
+          erased++;
+          break;
+        }
+      }
+    }
+    return erased / stroke.points.length;
+  }
+
   function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
     const painting = getPainting();
-    const strokes = painting.strokes.filter((s) => !ERASERS.has(s.brush) && s.points.length >= 2);
+    const allStrokes = painting.strokes.filter((s) => s.points.length >= 2);
+    const paintStrokes = allStrokes
+      .map((s, i) => ({ stroke: s, originalIdx: i }))
+      .filter(({ stroke }) => !ERASERS.has(stroke.brush));
 
-    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+    if (paintStrokes.length === 0) return { items: [], totalDuration: 0 };
 
     const GAP = 0.08;
     const items: ScheduledStroke[] = [];
     let offset = 0;
 
-    for (const stroke of strokes) {
+    for (const { stroke, originalIdx } of paintStrokes) {
+      // Skip strokes that are mostly erased
+      if (erasedFraction(originalIdx, allStrokes) > 0.5) continue;
+
       const pts = stroke.points;
       const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
       items.push({
@@ -72,7 +112,7 @@ export function createPlayhead(
     }
 
     const pauseDuration = 1.0;
-    const totalDuration = offset - (strokes.length > 1 ? GAP : 0) + pauseDuration;
+    const totalDuration = offset - (items.length > 1 ? GAP : 0) + pauseDuration;
     return { items, totalDuration };
   }
 
