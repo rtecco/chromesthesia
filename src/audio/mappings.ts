@@ -1,5 +1,6 @@
 import type { PaletteColor, StrokePoint } from '../types';
 import { clamp, lerp, scale } from '../utils/math';
+import { debugParams } from '../ui/debug';
 
 // --- HSL-derived voice parameters ---
 
@@ -23,12 +24,12 @@ export type VoiceParams = {
 export function voiceParamsFromColor(color: PaletteColor): VoiceParams {
   const [h, s, l] = color.hsl;
 
-  // Lightness → base pitch (light=high, dark=low)
-  const baseFreq = scale(l, 0, 100, 80, 520);
+  // Lightness → base pitch (light=high, dark=low) — wide range for drama
+  const baseFreq = scale(l, 0, 100, debugParams.baseFreqMin, debugParams.baseFreqMax);
 
   // Saturation → harmonic richness
   const richness = s / 100; // 0..1
-  const detuneRange = lerp(2, 14, richness);
+  const detuneRange = lerp(2, debugParams.detuneMax, richness);
   const partialCount = richness > 0.5 ? 4 : richness > 0.25 ? 3 : 2;
 
   // Hue → waveform character
@@ -46,12 +47,12 @@ export function voiceParamsFromColor(color: PaletteColor): VoiceParams {
   }
 
   // Hue + saturation → filter character
-  const filterType: BiquadFilterType = warmth > 0.5 ? 'lowpass' : warmth > 0.2 ? 'bandpass' : 'highpass';
+  const filterType: BiquadFilterType = warmth > 0.5 ? 'highpass' : warmth > 0.2 ? 'bandpass' : 'lowpass';
   const filterFreq = lerp(400, 3000, warmth) * lerp(0.6, 1.4, l / 100);
   const filterQ = lerp(0.5, 8, richness);
 
   // Noise: more for warm/saturated, less for cool/pure
-  const noiseAmount = lerp(0.02, 0.15, warmth * richness);
+  const noiseAmount = lerp(0.02, debugParams.noiseMax, warmth * richness);
 
   return {
     baseFreq,
@@ -88,14 +89,12 @@ export function positionMod(point: StrokePoint): PositionMod {
   const x = clamp(point.x, 0, 1);
   const y = clamp(point.y, 0, 1);
 
+  const p = debugParams;
   return {
-    // X: left=dark, right=bright
-    filterCutoffMul: lerp(0.3, 3.0, x),
+    filterCutoffMul: lerp(p.filterCutoffMin, p.filterCutoffMax, x * x),
     brightness: x,
-    // Y: top=higher pitch, bottom=lower
-    pitchShift: lerp(7, -7, y), // semitones
-    // Y: top=dry, bottom=wet
-    reverbMix: lerp(0.1, 0.7, y),
+    pitchShift: lerp(p.pitchShiftRange, -p.pitchShiftRange, y),
+    reverbMix: lerp(p.reverbMixMin, p.reverbMixMax, y),
   };
 }
 

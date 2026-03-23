@@ -1,5 +1,6 @@
 import { getAudioContext } from './engine';
 import type { VoiceParams, PositionMod } from './mappings';
+import { debugParams } from '../ui/debug';
 
 export type Voice = {
   output: GainNode;
@@ -11,6 +12,7 @@ export function createVoice(
   params: VoiceParams,
   mod: PositionMod,
   velocity: number,
+  gainScale = 1.0,
 ): Voice {
   const ctx = getAudioContext();
   const now = ctx.currentTime;
@@ -19,7 +21,7 @@ export function createVoice(
   const voiceGain = ctx.createGain();
   voiceGain.gain.setValueAtTime(0, now);
   const attackTime = params.attackTime * (1 - velocity * 0.5); // faster attack at high velocity
-  const peakGain = 0.25;
+  const peakGain = debugParams.peakGain * gainScale;
   voiceGain.gain.linearRampToValueAtTime(peakGain, now + attackTime);
 
   // Filter

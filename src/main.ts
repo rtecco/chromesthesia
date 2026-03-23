@@ -2,11 +2,14 @@ import type { BrushType, EraserTool, Painting, Stroke, StrokePoint } from './typ
 import { createRenderer } from './canvas/renderer';
 import { createBrushState, type BrushState } from './canvas/brushes';
 import { initStrokeRecorder } from './canvas/stroke-recorder';
-import { initControls } from './ui/controls';
+import { initControls, type AudioMode } from './ui/controls';
 import { ensureResumed } from './audio/engine';
 import { createVoice, type Voice } from './audio/voices';
 import { voiceParamsFromColor, positionMod } from './audio/mappings';
 import { getEffectChain } from './audio/effects';
+import { createPlayhead } from './audio/playhead';
+import { initDebugPanel } from './ui/debug';
+import { getMasterOutput } from './audio/engine';
 
 const LOOP_LENGTH_MS = 4000;
 const ERASERS: ReadonlySet<BrushType> = new Set<EraserTool>(['scraper', 'solvent']);
@@ -30,17 +33,21 @@ const activeStrokes = new Map<string, ActiveStroke>();
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const renderer = createRenderer(canvas);
 
-let playing = false;
+const playhead = createPlayhead(
+  () => painting,
+  (x) => renderer.setPlayheadPosition(x >= 0 ? x : null),
+);
 
 const controls = initControls({
-  onPlayStop() {
-    playing = !playing;
-    // TODO: Stage 4 — start/stop playhead
-    return playing;
+  onModeChange(mode: AudioMode) {
+    if (mode === 'playhead') {
+      playhead.start();
+    } else {
+      playhead.stop();
+    }
   },
   onClear() {
-    playing = false;
-    // TODO: Stage 4 — stop playhead
+    playhead.stop();
     painting = { ...painting, strokes: [] };
     activeStrokes.clear();
     renderer.clear();
@@ -55,8 +62,8 @@ initStrokeRecorder(canvas, {
     const brushState = createBrushState(stroke.brush);
     let voice: Voice | null = null;
 
-    // Only create sound for paint brushes, not erasers
-    if (!ERASERS.has(stroke.brush)) {
+    // Live audition: only in live mode, only for paint brushes
+    if (controls.audioMode === 'live' && !ERASERS.has(stroke.brush)) {
       void ensureResumed();
       const params = voiceParamsFromColor(stroke.color);
       const mod = positionMod(stroke.points[0]);
@@ -76,7 +83,6 @@ initStrokeRecorder(canvas, {
     entry.points.push(point);
     renderer.drawSegment(entry.stroke, prev, point, entry.brushState);
 
-    // Update voice with new position
     if (entry.voice) {
       const mod = positionMod(point);
       entry.voice.updatePosition(mod);
@@ -87,7 +93,6 @@ initStrokeRecorder(canvas, {
     const entry = activeStrokes.get(strokeId);
     if (!entry) return;
 
-    // Release the voice
     if (entry.voice) {
       entry.voice.stop();
     }
@@ -102,3 +107,7 @@ initStrokeRecorder(canvas, {
 });
 
 window.addEventListener('resize', () => renderer.resize());
+
+initDebugPanel((v) => {
+  getMasterOutput().gain.value = v;
+});

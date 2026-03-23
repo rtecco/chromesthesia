@@ -2,14 +2,17 @@ import type { BrushType, PaletteColor } from '../types';
 import { createPalette } from '../canvas/palette';
 import { hexToRgb, rgbToHex, rgbToHsl } from '../utils/color';
 
+export type AudioMode = 'live' | 'playhead';
+
 export type ControlState = {
   activeColor: PaletteColor | null;
   activeBrush: BrushType;
   palette: (PaletteColor | null)[];
+  audioMode: AudioMode;
 };
 
 export type ControlCallbacks = {
-  onPlayStop: () => boolean; // returns true if now playing
+  onModeChange: (mode: AudioMode) => void;
   onClear: () => void;
 };
 
@@ -36,6 +39,7 @@ export function initControls(callbacks: ControlCallbacks): ControlState {
     activeColor: palette[0],
     activeBrush: 'oil-flat',
     palette,
+    audioMode: 'live',
   };
 
   // Hidden color input for editing swatches
@@ -158,15 +162,23 @@ export function initControls(callbacks: ControlCallbacks): ControlState {
     brushContainer.appendChild(btn);
   });
 
-  // Transport controls
-  const playStopBtn = document.getElementById('btn-play-stop')!;
-  playStopBtn.addEventListener('click', () => {
-    const playing = callbacks.onPlayStop();
-    playStopBtn.textContent = playing ? 'Stop' : 'Play';
-  });
+  // Mode toggle
+  const liveBtn = document.getElementById('btn-live')!;
+  const playheadBtn = document.getElementById('btn-playhead')!;
+
+  function setMode(mode: AudioMode) {
+    state.audioMode = mode;
+    liveBtn.classList.toggle('active', mode === 'live');
+    playheadBtn.classList.toggle('active', mode === 'playhead');
+    callbacks.onModeChange(mode);
+  }
+
+  liveBtn.addEventListener('click', () => setMode('live'));
+  playheadBtn.addEventListener('click', () => setMode('playhead'));
+
   document.getElementById('btn-clear')!.addEventListener('click', () => {
     callbacks.onClear();
-    playStopBtn.textContent = 'Play';
+    setMode('live');
   });
 
   return state;

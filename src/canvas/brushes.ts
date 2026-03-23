@@ -229,7 +229,7 @@ const dryBrush: BrushRenderer = (rc, prev, curr, _state) => {
 
 const scraper: BrushRenderer = (rc, prev, curr, _state) => {
   const { ctx, canvasWidth, canvasHeight } = rc;
-  const width = lerp(14, 40, curr.pressure) * (canvasWidth / 960);
+  const width = lerp(20, 50, curr.pressure) * (canvasWidth / 960);
   const angle = strokeAngle(prev, curr);
   const perpX = Math.cos(angle + Math.PI / 2);
   const perpY = Math.sin(angle + Math.PI / 2);
@@ -239,7 +239,7 @@ const scraper: BrushRenderer = (rc, prev, curr, _state) => {
   ctx.globalCompositeOperation = 'destination-out';
 
   // Sharp quad that cuts paint away
-  ctx.globalAlpha = lerp(0.6, 1.0, curr.pressure);
+  ctx.globalAlpha = lerp(0.85, 1.0, curr.pressure);
   ctx.beginPath();
   ctx.moveTo(prev.x * canvasWidth - perpX * hw, prev.y * canvasHeight - perpY * hw);
   ctx.lineTo(prev.x * canvasWidth + perpX * hw, prev.y * canvasHeight + perpY * hw);
@@ -249,7 +249,7 @@ const scraper: BrushRenderer = (rc, prev, curr, _state) => {
   ctx.fill();
 
   // Fine scrape marks — thin lines that leave faint residue at edges
-  ctx.globalAlpha = 0.3;
+  ctx.globalAlpha = 0.7;
   for (let i = 0; i < 3; i++) {
     const t = (i / 2) - 0.5;
     ctx.beginPath();
@@ -271,7 +271,7 @@ const scraper: BrushRenderer = (rc, prev, curr, _state) => {
 
 const solvent: BrushRenderer = (rc, prev, curr, _state) => {
   const { ctx, canvasWidth, canvasHeight } = rc;
-  const radius = lerp(15, 40, curr.pressure) * (canvasWidth / 960);
+  const radius = lerp(25, 55, curr.pressure) * (canvasWidth / 960);
   const cx = curr.x * canvasWidth;
   const cy = curr.y * canvasHeight;
 
@@ -285,7 +285,7 @@ const solvent: BrushRenderer = (rc, prev, curr, _state) => {
     const angle = pseudoRand(i, curr.timestamp) * Math.PI * 2;
     const dist = pseudoRand(i + 5, curr.x) * radius * 0.6;
     const dabR = radius * lerp(0.3, 0.7, pseudoRand(i + 2, curr.y));
-    const dabAlpha = lerp(0.05, 0.15, curr.pressure);
+    const dabAlpha = lerp(0.15, 0.4, curr.pressure);
 
     ctx.globalAlpha = dabAlpha;
     ctx.beginPath();
@@ -297,14 +297,14 @@ const solvent: BrushRenderer = (rc, prev, curr, _state) => {
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
   grad.addColorStop(0, 'rgba(255,255,255,1)');
   grad.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.globalAlpha = lerp(0.08, 0.2, curr.pressure);
+  ctx.globalAlpha = lerp(0.25, 0.5, curr.pressure);
   ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
 
   // Connecting flow between previous and current point
-  ctx.globalAlpha = lerp(0.04, 0.12, curr.pressure);
+  ctx.globalAlpha = lerp(0.15, 0.35, curr.pressure);
   ctx.lineWidth = radius * 0.8;
   ctx.lineCap = 'round';
   ctx.strokeStyle = 'white';
