@@ -1,4 +1,6 @@
-export type BrushType = 'oil-flat' | 'oil-round' | 'palette-knife' | 'dry-brush';
+export type PaintBrush = 'oil-flat' | 'oil-round' | 'palette-knife' | 'dry-brush';
+export type EraserTool = 'scraper' | 'solvent';
+export type BrushType = PaintBrush | EraserTool;
 
 export type PaletteColor = {
   readonly name: string;

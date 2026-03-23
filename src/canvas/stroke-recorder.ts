@@ -1,10 +1,16 @@
 import type { StrokePoint, Stroke, BrushType, PaletteColor } from '../types';
 
+const ERASER_COLOR: PaletteColor = {
+  name: 'Eraser',
+  rgb: [0, 0, 0],
+  hsl: [0, 0, 0],
+};
+
 export type StrokeRecorderCallbacks = {
   onStrokeStart: (stroke: Stroke) => void;
   onStrokePoint: (strokeId: string, point: StrokePoint) => void;
   onStrokeEnd: (strokeId: string) => void;
-  getActiveColor: () => PaletteColor;
+  getActiveColor: () => PaletteColor | null;
   getActiveBrush: () => BrushType;
 };
 
@@ -36,7 +42,7 @@ export function initStrokeRecorder(
 
     const stroke: Stroke = {
       id,
-      color: callbacks.getActiveColor(),
+      color: callbacks.getActiveColor() ?? ERASER_COLOR,
       brush: callbacks.getActiveBrush(),
       points: [point],
     };

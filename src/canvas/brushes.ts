@@ -225,11 +225,104 @@ const dryBrush: BrushRenderer = (rc, prev, curr, _state) => {
   }
 };
 
+// --- Eraser tools ---
+
+const scraper: BrushRenderer = (rc, prev, curr, _state) => {
+  const { ctx, canvasWidth, canvasHeight } = rc;
+  const width = lerp(14, 40, curr.pressure) * (canvasWidth / 960);
+  const angle = strokeAngle(prev, curr);
+  const perpX = Math.cos(angle + Math.PI / 2);
+  const perpY = Math.sin(angle + Math.PI / 2);
+  const hw = width / 2;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+
+  // Sharp quad that cuts paint away
+  ctx.globalAlpha = lerp(0.6, 1.0, curr.pressure);
+  ctx.beginPath();
+  ctx.moveTo(prev.x * canvasWidth - perpX * hw, prev.y * canvasHeight - perpY * hw);
+  ctx.lineTo(prev.x * canvasWidth + perpX * hw, prev.y * canvasHeight + perpY * hw);
+  ctx.lineTo(curr.x * canvasWidth + perpX * hw, curr.y * canvasHeight + perpY * hw);
+  ctx.lineTo(curr.x * canvasWidth - perpX * hw, curr.y * canvasHeight - perpY * hw);
+  ctx.closePath();
+  ctx.fill();
+
+  // Fine scrape marks — thin lines that leave faint residue at edges
+  ctx.globalAlpha = 0.3;
+  for (let i = 0; i < 3; i++) {
+    const t = (i / 2) - 0.5;
+    ctx.beginPath();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 0.5 * (canvasWidth / 960);
+    ctx.moveTo(
+      prev.x * canvasWidth + perpX * t * width * 1.1,
+      prev.y * canvasHeight + perpY * t * width * 1.1,
+    );
+    ctx.lineTo(
+      curr.x * canvasWidth + perpX * t * width * 1.1,
+      curr.y * canvasHeight + perpY * t * width * 1.1,
+    );
+    ctx.stroke();
+  }
+
+  ctx.restore();
+};
+
+const solvent: BrushRenderer = (rc, prev, curr, _state) => {
+  const { ctx, canvasWidth, canvasHeight } = rc;
+  const radius = lerp(15, 40, curr.pressure) * (canvasWidth / 960);
+  const cx = curr.x * canvasWidth;
+  const cy = curr.y * canvasHeight;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+
+  // Soft dissolving dabs — multiple overlapping circles with low alpha
+  // creates the fluid, pooling turpentine look
+  const dabCount = 8;
+  for (let i = 0; i < dabCount; i++) {
+    const angle = pseudoRand(i, curr.timestamp) * Math.PI * 2;
+    const dist = pseudoRand(i + 5, curr.x) * radius * 0.6;
+    const dabR = radius * lerp(0.3, 0.7, pseudoRand(i + 2, curr.y));
+    const dabAlpha = lerp(0.05, 0.15, curr.pressure);
+
+    ctx.globalAlpha = dabAlpha;
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, dabR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Central dissolve — stronger in the middle, like solvent pooling
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.globalAlpha = lerp(0.08, 0.2, curr.pressure);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Connecting flow between previous and current point
+  ctx.globalAlpha = lerp(0.04, 0.12, curr.pressure);
+  ctx.lineWidth = radius * 0.8;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'white';
+  ctx.beginPath();
+  ctx.moveTo(prev.x * canvasWidth, prev.y * canvasHeight);
+  ctx.lineTo(cx, cy);
+  ctx.stroke();
+
+  ctx.restore();
+};
+
 const BRUSH_RENDERERS: Record<BrushType, BrushRenderer> = {
   'oil-flat': oilFlat,
   'oil-round': oilRound,
   'palette-knife': paletteKnife,
   'dry-brush': dryBrush,
+  'scraper': scraper,
+  'solvent': solvent,
 };
 
 export function renderSegment(

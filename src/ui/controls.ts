@@ -1,9 +1,11 @@
 import type { BrushType, PaletteColor } from '../types';
-import { DEFAULT_PALETTE } from '../canvas/palette';
+import { createPalette } from '../canvas/palette';
+import { hexToRgb, rgbToHex, rgbToHsl } from '../utils/color';
 
 export type ControlState = {
-  activeColor: PaletteColor;
+  activeColor: PaletteColor | null;
   activeBrush: BrushType;
+  palette: (PaletteColor | null)[];
 };
 
 export type ControlCallbacks = {
@@ -12,33 +14,99 @@ export type ControlCallbacks = {
   onClear: () => void;
 };
 
-const BRUSH_LABELS: Record<BrushType, string> = {
-  'oil-flat': 'Flat',
-  'oil-round': 'Round',
-  'palette-knife': 'Knife',
-  'dry-brush': 'Dry',
-};
+const PAINT_BRUSHES: { type: BrushType; label: string }[] = [
+  { type: 'oil-flat', label: 'Flat' },
+  { type: 'oil-round', label: 'Round' },
+  { type: 'palette-knife', label: 'Knife' },
+  { type: 'dry-brush', label: 'Dry' },
+];
+
+const ERASER_TOOLS: { type: BrushType; label: string }[] = [
+  { type: 'scraper', label: 'Scraper' },
+  { type: 'solvent', label: 'Solvent' },
+];
+
+function isEraserTool(brush: BrushType): boolean {
+  return brush === 'scraper' || brush === 'solvent';
+}
 
 export function initControls(callbacks: ControlCallbacks): ControlState {
+  const palette = createPalette();
+
   const state: ControlState = {
-    activeColor: DEFAULT_PALETTE[0],
+    activeColor: palette[0],
     activeBrush: 'oil-flat',
+    palette,
   };
+
+  // Hidden color input for editing swatches
+  const colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.style.position = 'absolute';
+  colorInput.style.opacity = '0';
+  colorInput.style.pointerEvents = 'none';
+  document.body.appendChild(colorInput);
+
+  let editingIndex = -1;
+  let editingSwatch: HTMLButtonElement | null = null;
+
+  colorInput.addEventListener('input', () => {
+    if (editingIndex < 0 || !editingSwatch) return;
+    const [r, g, b] = hexToRgb(colorInput.value);
+    const hsl = rgbToHsl(r, g, b);
+    const updated: PaletteColor = {
+      name: `Custom (${colorInput.value})`,
+      rgb: [r, g, b],
+      hsl,
+    };
+    palette[editingIndex] = updated;
+    state.activeColor = updated;
+    editingSwatch.style.background = `rgb(${r},${g},${b})`;
+    editingSwatch.classList.remove('empty');
+    editingSwatch.title = updated.name;
+  });
+
+  function selectSwatch(swatch: HTMLButtonElement, index: number) {
+    const color = palette[index];
+    if (!color) return; // can't select empty slot
+    state.activeColor = color;
+    // If we were on an eraser, switch back to last paint brush
+    if (isEraserTool(state.activeBrush)) {
+      state.activeBrush = 'oil-flat';
+      updateBrushSelection();
+    }
+    colorContainer.querySelectorAll('.swatch').forEach((s) => s.classList.remove('active'));
+    swatch.classList.add('active');
+  }
+
+  function openColorPicker(swatch: HTMLButtonElement, index: number) {
+    editingIndex = index;
+    editingSwatch = swatch;
+    const c = palette[index];
+    colorInput.value = c ? rgbToHex(c.rgb[0], c.rgb[1], c.rgb[2]) : '#808080';
+    colorInput.click();
+  }
 
   // Color picker
   const colorContainer = document.getElementById('color-picker')!;
-  DEFAULT_PALETTE.forEach((color) => {
+  palette.forEach((color, index) => {
     const swatch = document.createElement('button');
     swatch.type = 'button';
     swatch.className = 'swatch';
-    swatch.style.background = `rgb(${color.rgb[0]},${color.rgb[1]},${color.rgb[2]})`;
-    swatch.title = color.name;
-    if (color === state.activeColor) swatch.classList.add('active');
+    if (color) {
+      swatch.style.background = `rgb(${color.rgb[0]},${color.rgb[1]},${color.rgb[2]})`;
+      swatch.title = color.name;
+    } else {
+      swatch.classList.add('empty');
+      swatch.title = 'Double-click to add color';
+    }
+    if (index === 0) swatch.classList.add('active');
 
-    swatch.addEventListener('click', () => {
-      state.activeColor = color;
-      colorContainer.querySelectorAll('.swatch').forEach((s) => s.classList.remove('active'));
-      swatch.classList.add('active');
+    swatch.addEventListener('click', () => selectSwatch(swatch, index));
+
+    swatch.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      openColorPicker(swatch, index);
     });
 
     colorContainer.appendChild(swatch);
@@ -46,17 +114,46 @@ export function initControls(callbacks: ControlCallbacks): ControlState {
 
   // Brush picker
   const brushContainer = document.getElementById('brush-picker')!;
-  (Object.keys(BRUSH_LABELS) as BrushType[]).forEach((brush) => {
+
+  function updateBrushSelection() {
+    brushContainer.querySelectorAll('.brush-btn').forEach((b) => b.classList.remove('active'));
+    const active = brushContainer.querySelector(`[data-brush="${state.activeBrush}"]`);
+    if (active) active.classList.add('active');
+  }
+
+  PAINT_BRUSHES.forEach(({ type, label }) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'brush-btn';
-    btn.textContent = BRUSH_LABELS[brush];
-    if (brush === state.activeBrush) btn.classList.add('active');
+    btn.dataset.brush = type;
+    btn.textContent = label;
+    if (type === state.activeBrush) btn.classList.add('active');
 
     btn.addEventListener('click', () => {
-      state.activeBrush = brush;
-      brushContainer.querySelectorAll('.brush-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+      state.activeBrush = type;
+      updateBrushSelection();
+    });
+
+    brushContainer.appendChild(btn);
+  });
+
+  // Separator
+  const sep = document.createElement('span');
+  sep.className = 'toolbar-sep';
+  brushContainer.appendChild(sep);
+
+  ERASER_TOOLS.forEach(({ type, label }) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'brush-btn eraser-btn';
+    btn.dataset.brush = type;
+    btn.textContent = label;
+
+    btn.addEventListener('click', () => {
+      state.activeBrush = type;
+      updateBrushSelection();
+      // Deselect color swatch when using eraser
+      colorContainer.querySelectorAll('.swatch').forEach((s) => s.classList.remove('active'));
     });
 
     brushContainer.appendChild(btn);

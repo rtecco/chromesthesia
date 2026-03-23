@@ -7,3 +7,11 @@ export const DEFAULT_PALETTE: readonly PaletteColor[] = [
   { name: 'Ochre Gold',     rgb: [200, 160, 50],   hsl: [44, 60, 49] },
   { name: 'Titanium White', rgb: [245, 242, 235],  hsl: [42, 33, 94] },
 ];
+
+export const EMPTY_SLOTS = 3;
+
+export function createPalette(): (PaletteColor | null)[] {
+  const slots: (PaletteColor | null)[] = DEFAULT_PALETTE.map((c) => ({ ...c }));
+  for (let i = 0; i < EMPTY_SLOTS; i++) slots.push(null);
+  return slots;
+}

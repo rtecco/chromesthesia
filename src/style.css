@@ -90,3 +90,31 @@ button:hover {
   color: #fff;
   border-color: #333;
 }
+
+.swatch.empty {
+  background: transparent !important;
+  border: 2px dashed #ccc;
+}
+
+.swatch.empty:hover {
+  border-color: #999;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: #ddd;
+  margin: 0 2px;
+}
+
+.eraser-btn {
+  color: #888;
+  border-style: dashed;
+}
+
+.eraser-btn.active {
+  background: #666;
+  color: #fff;
+  border-style: solid;
+  border-color: #666;
+}

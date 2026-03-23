@@ -53,12 +53,13 @@ src/
 
 ## Audio Design
 
-**Voice per color** — not single oscillators but layered subtractive-additive patches:
-- **Cadmium Red:** 3 detuned saws + sub square, warm low-pass w/ resonance — growling, brassy
-- **Cobalt Blue:** 2 triangles + sine, band-pass sweep — hollow, woody
-- **Lavender:** 4 sines in harmonic series (1,2,3,5), high-shelf — glassy, bell-like
-- **Ochre Gold:** 2 squares + noise burst, LP w/ envelope — percussive, earthy
+**Voice derived from HSL** — palette is editable, so timbre is computed from any color's HSL:
+- **Hue** → oscillator mix & waveform character (warm hues = saws, cool hues = triangles/sines)
+- **Saturation** → harmonic richness (high sat = more partials/detune, low sat = purer tones)
+- **Lightness** → pitch register & filter brightness (light = high/bright, dark = low/warm)
 - Every voice has +/- 3-12 cent detuning for richness + filtered noise layer for "breath"
+- Default palette presets (Red, Blue, Lavender, Ochre, White) sound great out of the box
+- Users can double-click any swatch to change its color, which changes its sound
 
 **Position modulation:**
 - X-axis → filter cutoff (200-4200Hz), upper partial amplitude (left=dark, right=bright)
