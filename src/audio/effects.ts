@@ -5,6 +5,31 @@ export type EffectChain = {
   input: GainNode;
 };
 
+// Reverb
+const REVERB_DURATION = 2.5;     // impulse response length (seconds)
+const REVERB_DECAY = 0.6;        // exponential decay rate
+const REVERB_WET = 0.35;
+const REVERB_DRY = 0.65;
+
+// Chorus (oil-round)
+const CHORUS_DRY = 0.6;
+const CHORUS_RATES = [1.8, 2.3]; // LFO rates (Hz)
+const CHORUS_MAX_DELAY = 0.05;   // seconds
+const CHORUS_BASE_DELAY = 0.005; // seconds
+const CHORUS_DEPTH = 0.002;      // LFO modulation amount
+const CHORUS_WET = 0.3;
+
+// Distortion + slap delay (palette-knife)
+const DISTORTION_AMOUNT = 3;
+const DISTORTION_CURVE_SIZE = 256;
+const SLAP_DELAY_TIME = 0.08;    // seconds
+const SLAP_FEEDBACK = 0.25;
+const SLAP_WET = 0.3;
+
+// Tremolo (dry-brush)
+const TREMOLO_RATE = 35;         // Hz — fast stutter
+const TREMOLO_DEPTH = 0.5;
+
 // Synthetic impulse response for reverb — exponentially decaying noise
 function createReverbIR(ctx: AudioContext, duration: number, decay: number): AudioBuffer {
   const length = Math.ceil(ctx.sampleRate * duration);
@@ -22,14 +47,14 @@ let reverbIR: AudioBuffer | null = null;
 
 function getReverbIR(ctx: AudioContext): AudioBuffer {
   if (!reverbIR || reverbIR.sampleRate !== ctx.sampleRate) {
-    reverbIR = createReverbIR(ctx, 2.5, 0.6);
+    reverbIR = createReverbIR(ctx, REVERB_DURATION, REVERB_DECAY);
   }
   return reverbIR;
 }
 
 // Waveshaper curve for distortion
 function makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
-  const n = 256;
+  const n = DISTORTION_CURVE_SIZE;
   const curve = new Float32Array(n);
   for (let i = 0; i < n; i++) {
     const x = (i * 2) / n - 1;
@@ -49,9 +74,9 @@ function createOilFlatChain(): EffectChain {
   const convolver = ctx.createConvolver();
   convolver.buffer = getReverbIR(ctx);
   const wetGain = ctx.createGain();
-  wetGain.gain.value = 0.35;
+  wetGain.gain.value = REVERB_WET;
   const dryGain = ctx.createGain();
-  dryGain.gain.value = 0.65;
+  dryGain.gain.value = REVERB_DRY;
 
   input.connect(convolver);
   convolver.connect(wetGain);
@@ -71,26 +96,26 @@ function createOilRoundChain(): EffectChain {
 
   // Chorus: two slightly detuned delayed copies
   const dry = ctx.createGain();
-  dry.gain.value = 0.6;
+  dry.gain.value = CHORUS_DRY;
   input.connect(dry);
   dry.connect(master);
 
-  for (const rate of [1.8, 2.3]) {
-    const delay = ctx.createDelay(0.05);
-    delay.delayTime.value = 0.005;
+  for (const rate of CHORUS_RATES) {
+    const delay = ctx.createDelay(CHORUS_MAX_DELAY);
+    delay.delayTime.value = CHORUS_BASE_DELAY;
 
     // LFO modulating delay time
     const lfo = ctx.createOscillator();
     lfo.type = 'sine';
     lfo.frequency.value = rate;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.002; // subtle modulation
+    lfoGain.gain.value = CHORUS_DEPTH;
     lfo.connect(lfoGain);
     lfoGain.connect(delay.delayTime);
     lfo.start();
 
     const wet = ctx.createGain();
-    wet.gain.value = 0.3;
+    wet.gain.value = CHORUS_WET;
     input.connect(delay);
     delay.connect(wet);
     wet.connect(master);
@@ -108,16 +133,16 @@ function createPaletteKnifeChain(): EffectChain {
 
   // Distortion
   const shaper = ctx.createWaveShaper();
-  shaper.curve = makeDistortionCurve(3);
+  shaper.curve = makeDistortionCurve(DISTORTION_AMOUNT);
   shaper.oversample = '2x';
 
   // Slap delay
-  const delay = ctx.createDelay(0.2);
-  delay.delayTime.value = 0.08;
+  const delay = ctx.createDelay(SLAP_DELAY_TIME * 3);
+  delay.delayTime.value = SLAP_DELAY_TIME;
   const feedback = ctx.createGain();
-  feedback.gain.value = 0.25;
+  feedback.gain.value = SLAP_FEEDBACK;
   const delayWet = ctx.createGain();
-  delayWet.gain.value = 0.3;
+  delayWet.gain.value = SLAP_WET;
 
   input.connect(shaper);
   shaper.connect(master);
@@ -140,13 +165,13 @@ function createDryBrushChain(): EffectChain {
 
   // Rapid tremolo — gritty, broken texture
   const tremGain = ctx.createGain();
-  tremGain.gain.value = 0.5;
+  tremGain.gain.value = TREMOLO_DEPTH;
 
   const lfo = ctx.createOscillator();
   lfo.type = 'square';
-  lfo.frequency.value = 35; // fast stutter
+  lfo.frequency.value = TREMOLO_RATE;
   const lfoDepth = ctx.createGain();
-  lfoDepth.gain.value = 0.5;
+  lfoDepth.gain.value = TREMOLO_DEPTH;
   lfo.connect(lfoDepth);
   lfoDepth.connect(tremGain.gain);
   lfo.start();

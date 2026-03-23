@@ -8,6 +8,13 @@ import { debugParams } from '../ui/debug';
 const ERASERS: ReadonlySet<BrushType> = new Set<EraserTool>(['scraper', 'solvent']);
 const LOOKAHEAD_MS = 80;
 const SCHEDULE_INTERVAL_MS = 30;
+const ERASER_HIT_RADIUS = 0.04;   // normalized distance for eraser overlap detection
+const ERASED_THRESHOLD = 0.5;     // fraction of points erased before stroke is skipped
+const STROKE_GAP = 0.08;          // seconds of silence between replayed strokes
+const MIN_STROKE_DURATION_MS = 200;
+const LOOP_PAUSE = 1.0;           // seconds of silence before loop restarts
+const DEFAULT_REPLAY_VELOCITY = 0.5;
+const VOICE_CLEANUP_DELAY = 0.5;  // seconds after stopTime before removing voice
 
 export type ActiveReplayStroke = {
   points: readonly StrokePoint[];
@@ -61,8 +68,7 @@ export function createPlayhead(
     allStrokes: readonly { brush: BrushType; points: readonly StrokePoint[] }[],
   ): number {
     const stroke = allStrokes[strokeIdx];
-    const RADIUS = 0.04; // normalized distance threshold
-    const rSq = RADIUS * RADIUS;
+    const rSq = ERASER_HIT_RADIUS * ERASER_HIT_RADIUS;
 
     // Collect all eraser points from strokes painted AFTER this one
     const eraserPoints: StrokePoint[] = [];
@@ -98,16 +104,14 @@ export function createPlayhead(
 
     if (paintStrokes.length === 0) return { items: [], totalDuration: 0 };
 
-    const GAP = 0.08;
     const items: ScheduledStroke[] = [];
     let offset = 0;
 
     for (const { stroke, originalIdx } of paintStrokes) {
-      // Skip strokes that are mostly erased
-      if (erasedFraction(originalIdx, allStrokes) > 0.5) continue;
+      if (erasedFraction(originalIdx, allStrokes) > ERASED_THRESHOLD) continue;
 
       const pts = stroke.points;
-      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 200) / 1000;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, MIN_STROKE_DURATION_MS) / 1000;
       items.push({
         color: stroke.color,
         brush: stroke.brush,
@@ -115,11 +119,10 @@ export function createPlayhead(
         duration: dur,
         points: pts,
       });
-      offset += dur + GAP;
+      offset += dur + STROKE_GAP;
     }
 
-    const pauseDuration = 1.0;
-    const totalDuration = offset - (items.length > 1 ? GAP : 0) + pauseDuration;
+    const totalDuration = offset - (items.length > 1 ? STROKE_GAP : 0) + LOOP_PAUSE;
     return { items, totalDuration };
   }
 
@@ -133,7 +136,7 @@ export function createPlayhead(
     const firstPoint = ss.points[0];
     const params = voiceParamsFromColor(ss.color);
     const mod = positionMod(firstPoint);
-    const voice = createVoice(params, mod, 0.5);
+    const voice = createVoice(params, mod, DEFAULT_REPLAY_VELOCITY);
     const chain = getEffectChain(ss.brush);
     voice.output.connect(chain.input);
 
@@ -186,7 +189,7 @@ export function createPlayhead(
 
     // Cleanup finished voices
     for (let i = activeVoices.length - 1; i >= 0; i--) {
-      if (activeVoices[i].stopTime < now - 0.5) {
+      if (activeVoices[i].stopTime < now - VOICE_CLEANUP_DELAY) {
         activeVoices.splice(i, 1);
       }
     }

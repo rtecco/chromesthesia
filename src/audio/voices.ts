@@ -2,6 +2,15 @@ import { getAudioContext } from './engine';
 import type { VoiceParams, PositionMod } from './mappings';
 import { debugParams } from '../ui/debug';
 
+const VELOCITY_ATTACK_SCALE = 0.5;  // how much velocity shortens attack
+const BRIGHTNESS_BOOST = 0.5;       // upper partial gain from X position
+const NOISE_THRESHOLD = 0.01;       // below this, skip noise layer
+const NOISE_BUFFER_DURATION = 0.5;  // seconds
+const NOISE_VELOCITY_SCALE = 2;     // velocity multiplier for noise amount
+const NOISE_BANDPASS_Q = 2;         // Q for noise bandpass filter
+const PARAM_RAMP_TIME = 0.02;       // seconds for position update smoothing
+const RELEASE_BUFFER = 0.05;        // extra time after release before stopping nodes
+
 export type Voice = {
   output: GainNode;
   stop: (when?: number) => void;
@@ -20,7 +29,7 @@ export function createVoice(
   // Master voice gain with envelope
   const voiceGain = ctx.createGain();
   voiceGain.gain.setValueAtTime(0, now);
-  const attackTime = params.attackTime * (1 - velocity * 0.5); // faster attack at high velocity
+  const attackTime = params.attackTime * (1 - velocity * VELOCITY_ATTACK_SCALE);
   const peakGain = debugParams.peakGain * gainScale;
   voiceGain.gain.linearRampToValueAtTime(peakGain, now + attackTime);
 
@@ -49,7 +58,7 @@ export function createVoice(
 
     const oscGain = ctx.createGain();
     // Upper partials boosted by brightness (X position)
-    const brightBoost = i > 0 ? mod.brightness * 0.5 : 0;
+    const brightBoost = i > 0 ? mod.brightness * BRIGHTNESS_BOOST : 0;
     oscGain.gain.value = spec.gainScale * (1 + brightBoost);
 
     osc.connect(oscGain);
@@ -61,20 +70,20 @@ export function createVoice(
 
   // Noise layer — filtered band around the fundamental
   let noiseSource: AudioBufferSourceNode | null = null;
-  if (params.noiseAmount > 0.01) {
-    const noiseBuffer = createNoiseBuffer(ctx, 0.5);
+  if (params.noiseAmount > NOISE_THRESHOLD) {
+    const noiseBuffer = createNoiseBuffer(ctx, NOISE_BUFFER_DURATION);
     noiseSource = ctx.createBufferSource();
     noiseSource.buffer = noiseBuffer;
     noiseSource.loop = true;
 
     const noiseGain = ctx.createGain();
     // More noise at high velocity
-    noiseGain.gain.value = params.noiseAmount * (1 + velocity * 2);
+    noiseGain.gain.value = params.noiseAmount * (1 + velocity * NOISE_VELOCITY_SCALE);
 
     const noiseBP = ctx.createBiquadFilter();
     noiseBP.type = 'bandpass';
     noiseBP.frequency.value = baseFreq;
-    noiseBP.Q.value = 2;
+    noiseBP.Q.value = NOISE_BANDPASS_Q;
 
     noiseSource.connect(noiseBP);
     noiseBP.connect(noiseGain);
@@ -92,7 +101,7 @@ export function createVoice(
       voiceGain.gain.setValueAtTime(voiceGain.gain.value, t);
       voiceGain.gain.linearRampToValueAtTime(0, t + release);
 
-      const stopAt = t + release + 0.05;
+      const stopAt = t + release + RELEASE_BUFFER;
       for (const osc of oscs) {
         try { osc.stop(stopAt); } catch (_) { /* already stopped */ }
       }
@@ -105,15 +114,15 @@ export function createVoice(
       const t = ctx.currentTime;
       filter.frequency.linearRampToValueAtTime(
         params.filterFreq * newMod.filterCutoffMul,
-        t + 0.02,
+        t + PARAM_RAMP_TIME,
       );
       // Update brightness on upper partials
       for (let i = 1; i < oscGains.length; i++) {
         const spec = params.oscillators[i];
-        const brightBoost = newMod.brightness * 0.5;
+        const brightBoost = newMod.brightness * BRIGHTNESS_BOOST;
         oscGains[i].gain.linearRampToValueAtTime(
           spec.gainScale * (1 + brightBoost),
-          t + 0.02,
+          t + PARAM_RAMP_TIME,
         );
       }
     },
