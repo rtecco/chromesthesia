@@ -1,4 +1,4 @@
-# Sound Painter — Implementation Plan
+# Chromesthesia — Implementation Plan
 
 ## Context
 

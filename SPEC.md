@@ -1,4 +1,4 @@
-## Sound Painter
+## Chromesthesia
 
 ### Project Overview
 - Audio toy
