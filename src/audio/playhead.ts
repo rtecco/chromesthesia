@@ -1,191 +1,148 @@
-import type { BrushType, EraserTool, PaletteColor, Painting, StrokePoint } from '../types';
+import type { BrushType, EraserTool, Painting, PaletteColor, StrokePoint } from '../types';
 import { getAudioContext, ensureResumed } from './engine';
 import { createVoice, type Voice } from './voices';
 import { voiceParamsFromColor, positionMod } from './mappings';
 import { getEffectChain } from './effects';
 import { debugParams } from '../ui/debug';
 
-const COLUMNS = 128;
-const LOOKAHEAD_MS = 50;
-const SCHEDULE_INTERVAL_MS = 25;
-
 const ERASERS: ReadonlySet<BrushType> = new Set<EraserTool>(['scraper', 'solvent']);
+const LOOKAHEAD_MS = 80;
+const SCHEDULE_INTERVAL_MS = 30;
 
 export type Playhead = {
   start: () => void;
   stop: () => void;
   isPlaying: () => boolean;
-  getPosition: () => number; // 0..1 normalized X position
 };
 
-type ActivePlayheadVoice = {
-  voice: Voice;
-  startedAtCol: number;
-};
-
+/**
+ * Stroke-replay: replays each stroke as a single continuous voice
+ * (matching live audition behavior), updating position along the
+ * recorded trajectory. Loops with a pause at the end.
+ */
 export function createPlayhead(
   getPainting: () => Painting,
-  onPositionChange: (x: number) => void,
 ): Playhead {
   let playing = false;
   let schedulerTimer: ReturnType<typeof setInterval> | null = null;
-  let animFrameId = 0;
-  let loopStartTime = 0; // AudioContext time when loop started
-  let lastScheduledCol = -1;
-  const activeVoices: ActivePlayheadVoice[] = [];
+  let loopStartTime = 0;
+  let loopDuration = 0;
 
-  function getLoopDuration(): number {
-    return getPainting().loopLengthMs / 1000; // seconds
-  }
+  type ScheduledStroke = {
+    color: PaletteColor;
+    brush: BrushType;
+    startOffset: number;   // seconds from loop start
+    duration: number;      // seconds
+    points: readonly StrokePoint[];
+  };
 
-  function getColumnDuration(): number {
-    return getLoopDuration() / COLUMNS;
-  }
+  let schedule: ScheduledStroke[] = [];
+  let nextStrokeIdx = 0;
 
-  // Find strokes that pass through a given column (normalized X range)
-  function strokesAtColumn(col: number): { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] {
+  type ActiveStrokeVoice = {
+    voice: Voice;
+    ss: ScheduledStroke;
+    voiceStartTime: number; // absolute AudioContext time when voice started
+    nextPointIdx: number;
+    stopTime: number;
+  };
+  const activeVoices: ActiveStrokeVoice[] = [];
+
+  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
     const painting = getPainting();
-    const colStart = col / COLUMNS;
-    const colEnd = (col + 1) / COLUMNS;
-    const results: { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] = [];
+    const strokes = painting.strokes.filter((s) => !ERASERS.has(s.brush) && s.points.length >= 2);
 
-    for (const stroke of painting.strokes) {
-      if (ERASERS.has(stroke.brush)) continue;
+    if (strokes.length === 0) return { items: [], totalDuration: 0 };
 
-      // Find points within this column's X range
-      const pointsInCol: StrokePoint[] = [];
-      for (const pt of stroke.points) {
-        if (pt.x >= colStart && pt.x < colEnd) {
-          pointsInCol.push(pt);
-        }
-      }
-      // Also check segments that cross through this column
-      for (let i = 1; i < stroke.points.length; i++) {
-        const a = stroke.points[i - 1];
-        const b = stroke.points[i];
-        if ((a.x < colStart && b.x >= colStart) || (a.x >= colEnd && b.x < colEnd)) {
-          // Interpolate a point at the column boundary
-          const t = (colStart - a.x) / (b.x - a.x);
-          if (t >= 0 && t <= 1) {
-            pointsInCol.push({
-              x: colStart,
-              y: a.y + (b.y - a.y) * t,
-              pressure: a.pressure + (b.pressure - a.pressure) * t,
-              timestamp: a.timestamp + (b.timestamp - a.timestamp) * t,
-            });
-          }
-        }
-      }
+    const GAP = 0.08;
+    const items: ScheduledStroke[] = [];
+    let offset = 0;
 
-      if (pointsInCol.length === 0) continue;
-
-      // Average the points for this stroke in this column
-      let sumX = 0, sumY = 0, sumP = 0;
-      for (const p of pointsInCol) {
-        sumX += p.x;
-        sumY += p.y;
-        sumP += p.pressure;
-      }
-      const n = pointsInCol.length;
-      results.push({
+    for (const stroke of strokes) {
+      const pts = stroke.points;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      items.push({
         color: stroke.color,
         brush: stroke.brush,
-        avgPoint: {
-          x: sumX / n,
-          y: sumY / n,
-          pressure: sumP / n,
-          timestamp: 0,
-        },
+        startOffset: offset,
+        duration: dur,
+        points: pts,
       });
+      offset += dur + GAP;
     }
 
-    return results;
+    const pauseDuration = 1.0;
+    const totalDuration = offset - (strokes.length > 1 ? GAP : 0) + pauseDuration;
+    return { items, totalDuration };
   }
 
-  function triggerColumn(col: number, when: number) {
-    const colDur = getColumnDuration();
-    const hits = strokesAtColumn(col);
-
-    // Scale gain down when many strokes hit the same column
-    const density = hits.length;
-    const gainScale = density <= 1 ? 1.0 : 1.0 / Math.sqrt(density);
-
-    for (const hit of hits) {
-      // Voice stealing: remove oldest if at limit
-      while (activeVoices.length >= debugParams.maxVoices) {
-        const oldest = activeVoices.shift()!;
-        oldest.voice.stop();
-      }
-
-      const params = voiceParamsFromColor(hit.color);
-      const mod = positionMod(hit.avgPoint);
-      const voice = createVoice(params, mod, hit.avgPoint.pressure, gainScale);
-      const chain = getEffectChain(hit.brush);
-      voice.output.connect(chain.input);
-
-      // Schedule stop — overlap controlled by debug slider
-      voice.stop(when + colDur * debugParams.voiceOverlap);
-
-      activeVoices.push({ voice, startedAtCol: col });
+  function startStrokeVoice(ss: ScheduledStroke, when: number) {
+    // Voice stealing
+    while (activeVoices.length >= debugParams.maxVoices) {
+      const oldest = activeVoices.shift()!;
+      oldest.voice.stop();
     }
 
-    // Clean up voices that have finished
-    const now = getAudioContext().currentTime;
+    const firstPoint = ss.points[0];
+    const params = voiceParamsFromColor(ss.color);
+    const mod = positionMod(firstPoint);
+    const voice = createVoice(params, mod, 0.5);
+    const chain = getEffectChain(ss.brush);
+    voice.output.connect(chain.input);
+
+    const stopTime = when + ss.duration;
+    voice.stop(stopTime);
+
+    activeVoices.push({ voice, ss, voiceStartTime: when, nextPointIdx: 1, stopTime });
+  }
+
+  function scheduleAhead() {
+    if (schedule.length === 0) return;
+
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const lookahead = LOOKAHEAD_MS / 1000;
+
+    // Check if we need to start a new loop
+    if (nextStrokeIdx >= schedule.length && now >= loopStartTime + loopDuration - lookahead) {
+      loopStartTime = Math.max(loopStartTime + loopDuration, now);
+      nextStrokeIdx = 0;
+    }
+
+    // Start new stroke voices that fall within the lookahead window
+    while (nextStrokeIdx < schedule.length) {
+      const ss = schedule[nextStrokeIdx];
+      const absTime = loopStartTime + ss.startOffset;
+
+      if (absTime > now + lookahead) break;
+
+      // Use absTime directly — Web Audio handles near-past scheduling,
+      // and this preserves relative timing between strokes
+      startStrokeVoice(ss, absTime);
+      nextStrokeIdx++;
+    }
+
+    // Update position on active voices using their own start time
+    for (const av of activeVoices) {
+      const strokeElapsed = now - av.voiceStartTime;
+      if (strokeElapsed < 0) continue;
+
+      while (av.nextPointIdx < av.ss.points.length) {
+        const pointTime = (av.ss.points[av.nextPointIdx].timestamp - av.ss.points[0].timestamp) / 1000;
+        if (pointTime > strokeElapsed) break;
+
+        const mod = positionMod(av.ss.points[av.nextPointIdx]);
+        av.voice.updatePosition(mod);
+        av.nextPointIdx++;
+      }
+    }
+
+    // Cleanup finished voices
     for (let i = activeVoices.length - 1; i >= 0; i--) {
-      const age = (now - when) + (col - activeVoices[i].startedAtCol) * colDur;
-      if (age > colDur * 2) {
+      if (activeVoices[i].stopTime < now - 0.5) {
         activeVoices.splice(i, 1);
       }
     }
-  }
-
-  function schedule() {
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-    const loopDur = getLoopDuration();
-    const colDur = getColumnDuration();
-    const lookaheadSec = LOOKAHEAD_MS / 1000;
-
-    // How far into the loop are we?
-    const elapsed = now - loopStartTime;
-
-    // Schedule columns up to the lookahead window
-    const endTime = now + lookaheadSec;
-    let col = lastScheduledCol + 1;
-    if (col >= COLUMNS) col = 0;
-
-    while (true) {
-      // Time when this column should play
-      const colLoopTime = (col / COLUMNS) * loopDur;
-      // Which loop iteration are we in?
-      const loopIteration = Math.floor(elapsed / loopDur);
-      let colAbsTime = loopStartTime + loopIteration * loopDur + colLoopTime;
-
-      // If this column's time has already passed in this iteration, it's in the next one
-      if (colAbsTime < now - colDur) {
-        colAbsTime += loopDur;
-      }
-
-      if (colAbsTime > endTime) break;
-      if (colAbsTime >= now - 0.01) {
-        triggerColumn(col, colAbsTime);
-        lastScheduledCol = col;
-      }
-
-      col = (col + 1) % COLUMNS;
-      // Safety: don't schedule more than COLUMNS in one pass
-      if (col === (lastScheduledCol + 1) % COLUMNS) break;
-    }
-  }
-
-  function updateVisual() {
-    if (!playing) return;
-    const ctx = getAudioContext();
-    const elapsed = ctx.currentTime - loopStartTime;
-    const loopDur = getLoopDuration();
-    const position = (elapsed % loopDur) / loopDur;
-    onPositionChange(position);
-    animFrameId = requestAnimationFrame(updateVisual);
   }
 
   function stopAllVoices() {
@@ -200,13 +157,20 @@ export function createPlayhead(
       if (playing) return;
       playing = true;
       void ensureResumed();
-      const ctx = getAudioContext();
-      loopStartTime = ctx.currentTime;
-      lastScheduledCol = -1;
 
-      schedulerTimer = setInterval(schedule, SCHEDULE_INTERVAL_MS);
-      schedule(); // immediate first pass
-      animFrameId = requestAnimationFrame(updateVisual);
+      const built = buildSchedule();
+      schedule = built.items;
+      loopDuration = built.totalDuration;
+      if (loopDuration <= 0) {
+        playing = false;
+        return;
+      }
+
+      nextStrokeIdx = 0;
+      loopStartTime = getAudioContext().currentTime;
+
+      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+      scheduleAhead();
     },
 
     stop() {
@@ -216,20 +180,10 @@ export function createPlayhead(
         clearInterval(schedulerTimer);
         schedulerTimer = null;
       }
-      if (animFrameId) {
-        cancelAnimationFrame(animFrameId);
-        animFrameId = 0;
-      }
       stopAllVoices();
-      onPositionChange(-1); // hide playhead
+      schedule = [];
     },
 
     isPlaying: () => playing,
-    getPosition() {
-      if (!playing) return 0;
-      const ctx = getAudioContext();
-      const elapsed = ctx.currentTime - loopStartTime;
-      return (elapsed % getLoopDuration()) / getLoopDuration();
-    },
   };
 }

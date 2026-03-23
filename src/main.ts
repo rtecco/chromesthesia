@@ -33,10 +33,7 @@ const activeStrokes = new Map<string, ActiveStroke>();
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const renderer = createRenderer(canvas);
 
-const playhead = createPlayhead(
-  () => painting,
-  (x) => renderer.setPlayheadPosition(x >= 0 ? x : null),
-);
+const playhead = createPlayhead(() => painting);
 
 const { state: controls, setMode } = initControls({
   onModeChange(mode: AudioMode) {
