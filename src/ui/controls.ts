@@ -9,8 +9,7 @@ export type ControlState = {
 };
 
 export type ControlCallbacks = {
-  onPlay: () => void;
-  onStop: () => void;
+  onPlayStop: () => boolean; // returns true if now playing
   onClear: () => void;
 };
 
@@ -160,9 +159,15 @@ export function initControls(callbacks: ControlCallbacks): ControlState {
   });
 
   // Transport controls
-  document.getElementById('btn-play')!.addEventListener('click', callbacks.onPlay);
-  document.getElementById('btn-stop')!.addEventListener('click', callbacks.onStop);
-  document.getElementById('btn-clear')!.addEventListener('click', callbacks.onClear);
+  const playStopBtn = document.getElementById('btn-play-stop')!;
+  playStopBtn.addEventListener('click', () => {
+    const playing = callbacks.onPlayStop();
+    playStopBtn.textContent = playing ? 'Stop' : 'Play';
+  });
+  document.getElementById('btn-clear')!.addEventListener('click', () => {
+    callbacks.onClear();
+    playStopBtn.textContent = 'Play';
+  });
 
   return state;
 }

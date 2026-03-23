@@ -30,14 +30,17 @@ const activeStrokes = new Map<string, ActiveStroke>();
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const renderer = createRenderer(canvas);
 
+let playing = false;
+
 const controls = initControls({
-  onPlay() {
-    // TODO: Stage 4 — playhead
-  },
-  onStop() {
-    // TODO: Stage 4 — playhead
+  onPlayStop() {
+    playing = !playing;
+    // TODO: Stage 4 — start/stop playhead
+    return playing;
   },
   onClear() {
+    playing = false;
+    // TODO: Stage 4 — stop playhead
     painting = { ...painting, strokes: [] };
     activeStrokes.clear();
     renderer.clear();
