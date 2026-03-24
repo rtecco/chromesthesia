@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 7</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 7/14</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-008.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-03-23T18-10-13-228Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T18-10-13-228Z" class="timestamp-link"><time datetime="2026-03-23T18:10:13.228Z" data-timestamp="2026-03-23T18:10:13.228Z">2026-03-23T18:10:13.228Z</time></a></div><div class="message-content">
+<div class="user-content"><p>No need for the replay to fill a 4-second loop. The loop duration should be whatever is required to replay the entire set of sounds. There's also no need for a "play head" to appear.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-22-829Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-22-829Z" class="timestamp-link"><time datetime="2026-03-23T18:10:22.829Z" data-timestamp="2026-03-23T18:10:22.829Z">2026-03-23T18:10:22.829Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01LDufV7iWLMWTpk58ktTau4">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  function buildSchedule(): ScheduledStroke[] {
+    const painting = getPainting();
+    const loopDur = painting.loopLengthMs / 1000;
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return [];
+
+    // Measure each stroke&#39;s recorded duration
+    const rawDurations = strokes.map((s) =&gt; {
+      const pts = s.points;
+      return Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+    });
+    const totalRawDur = rawDurations.reduce((a, b) =&gt; a + b, 0);
+
+    // Gap between strokes: 5% of loop time, split evenly
+    const totalGap = loopDur * 0.05;
+    const gapPerStroke = strokes.length &gt; 1 ? totalGap / (strokes.length - 1) : 0;
+    const availableTime = loopDur - totalGap;
+
+    // Scale each stroke&#39;s duration proportionally to fill available time
+    const result: ScheduledStroke[] = [];
+    let offset = 0;
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const scaledDur = (rawDurations[i] / totalRawDur) * availableTime;
+      result.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: scaledDur,
+        points: strokes[i].points,
+      });
+      offset += scaledDur + gapPerStroke;
+    }
+
+    return result;
+  }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+
+    // Each stroke plays at its original recorded duration
+    const GAP = 0.08; // small gap between strokes (seconds)
+    const items: ScheduledStroke[] = [];
+    let offset = 0;
+
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const pts = strokes[i].points;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      items.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: dur,
+        points: pts,
+      });
+      offset += dur + GAP;
+    }
+
+    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0); // no trailing gap
+    return { items, totalDuration };
+  }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-10-22-835Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-10-22-835Z" class="timestamp-link"><time datetime="2026-03-23T18:10:22.835Z" data-timestamp="2026-03-23T18:10:22.835Z">2026-03-23T18:10:22.835Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-27-363Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-27-363Z" class="timestamp-link"><time datetime="2026-03-23T18:10:27.363Z" data-timestamp="2026-03-23T18:10:27.363Z">2026-03-23T18:10:27.363Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the rest of the file to use the new schedule shape and remove the visual playhead:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-27-390Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-27-390Z" class="timestamp-link"><time datetime="2026-03-23T18:10:27.390Z" data-timestamp="2026-03-23T18:10:27.390Z">2026-03-23T18:10:27.390Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XpmhZ2dRCLsApbxQLTMpmv"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/playhead.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-10-27-405Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-10-27-405Z" class="timestamp-link"><time datetime="2026-03-23T18:10:27.405Z" data-timestamp="2026-03-23T18:10:27.405Z">2026-03-23T18:10:27.405Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { BrushType, EraserTool, Painting, StrokePoint } from &#x27;../types&#x27;;
+     2→import { getAudioContext, ensureResumed } from &#x27;./engine&#x27;;
+     3→import { createVoice, type Voice } from &#x27;./voices&#x27;;
+     4→import { voiceParamsFromColor, positionMod } from &#x27;./mappings&#x27;;
+     5→import { getEffectChain } from &#x27;./effects&#x27;;
+     6→import { debugParams } from &#x27;../ui/debug&#x27;;
+     7→
+     8→const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#x27;scraper&#x27;, &#x27;solvent&#x27;]);
+     9→const LOOKAHEAD_MS = 80;
+    10→const SCHEDULE_INTERVAL_MS = 30;
+    11→
+    12→export type Playhead = {
+    13→  start: () =&gt; void;
+    14→  stop: () =&gt; void;
+    15→  isPlaying: () =&gt; boolean;
+    16→  getPosition: () =&gt; number;
+    17→};
+    18→
+    19→/**
+    20→ * Stroke-replay playhead: replays each stroke&#x27;s recorded trajectory as sound,
+    21→ * in the order the strokes were painted, looping over the painting&#x27;s loopLengthMs.
+    22→ *
+    23→ * Each stroke is assigned a time slot proportional to its recorded duration.
+    24→ * Strokes are played sequentially with small gaps between them.
+    25→ */
+    26→export function createPlayhead(
+    27→  getPainting: () =&gt; Painting,
+    28→  onPositionChange: (x: number) =&gt; void,
+    29→): Playhead {
+    30→  let playing = false;
+    31→  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+    32→  let animFrameId = 0;
+    33→  let loopStartTime = 0;
+    34→
+    35→  // Schedule state
+    36→  type ScheduledStroke = {
+    37→    strokeIndex: number;
+    38→    startOffset: number;   // seconds from loop start
+    39→    duration: number;      // seconds
+    40→    points: readonly StrokePoint[];
+    41→  };
+    42→
+    43→  let schedule: ScheduledStroke[] = [];
+    44→  let nextEvent: { strokeIdx: number; pointIdx: number } = { strokeIdx: 0, pointIdx: 0 };
+    45→
+    46→  // Track active voices for cleanup and voice stealing
+    47→  type ActiveReplayVoice = {
+    48→    voice: Voice;
+    49→    stopTime: number;
+    50→  };
+    51→  const activeVoices: ActiveReplayVoice[] = [];
+    52→
+    53→  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
+    54→    const painting = getPainting();
+    55→    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    56→
+    57→    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+    58→
+    59→    // Each stroke plays at its original recorded duration
+    60→    const GAP = 0.08; // small gap between strokes (seconds)
+    61→    const items: ScheduledStroke[] = [];
+    62→    let offset = 0;
+    63→
+    64→    for (let i = 0; i &lt; strokes.length; i++) {
+    65→      const pts = strokes[i].points;
+    66→      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+    67→      items.push({
+    68→        strokeIndex: i,
+    69→        startOffset: offset,
+    70→        duration: dur,
+    71→        points: pts,
+    72→      });
+    73→      offset += dur + GAP;
+    74→    }
+    75→
+    76→    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0); // no trailing gap
+    77→    return { items, totalDuration };
+    78→  }
+    79→
+    80→  function getLoopDuration(): number {
+    81→    return getPainting().loopLengthMs / 1000;
+    82→  }
+    83→
+    84→  /** Returns position within current loop in seconds */
+    85→  function loopPosition(): number {
+    86→    const ctx = getAudioContext();
+    87→    const elapsed = ctx.currentTime - loopStartTime;
+    88→    const loopDur = getLoopDuration();
+    89→    return elapsed % loopDur;
+    90→  }
+    91→
+    92→  function triggerStrokeVoice(
+    93→    ss: ScheduledStroke,
+    94→    pointIdx: number,
+    95→    when: number,
+    96→  ) {
+    97→    const painting = getPainting();
+    98→    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    99→    const stroke = strokes[ss.strokeIndex];
+   100→    if (!stroke) return;
+   101→
+   102→    const point = ss.points[pointIdx];
+   103→    const params = voiceParamsFromColor(stroke.color);
+   104→    const mod = positionMod(point);
+   105→
+   106→    // Voice stealing
+   107→    while (activeVoices.length &gt;= debugParams.maxVoices) {
+   108→      const oldest = activeVoices.shift()!;
+   109→      oldest.voice.stop();
+   110→    }
+   111→
+   112→    const voice = createVoice(params, mod, point.pressure);
+   113→    const chain = getEffectChain(stroke.brush);
+   114→    voice.output.connect(chain.input);
+   115→
+   116→    // Voice duration: time until next point, scaled to scheduled duration
+   117→    const rawDur = (ss.points[ss.points.length - 1].timestamp - ss.points[0].timestamp) / 1000;
+   118→    const timeScale = rawDur &gt; 0 ? ss.duration / rawDur : 1;
+   119→    let voiceDur: number;
+   120→    if (pointIdx &lt; ss.points.length - 1) {
+   121→      voiceDur = ((ss.points[pointIdx + 1].timestamp - point.timestamp) / 1000) * timeScale;
+   122→      voiceDur = Math.max(voiceDur, 0.02);
+   123→    } else {
+   124→      voiceDur = 0.08; // last point — short tail
+   125→    }
+   126→
+   127→    const stopTime = when + voiceDur * debugParams.voiceOverlap;
+   128→    voice.stop(stopTime);
+   129→    activeVoices.push({ voice, stopTime });
+   130→  }
+   131→
+   132→  function scheduleAhead() {
+   133→    if (schedule.length === 0) return;
+   134→
+   135→    const ctx = getAudioContext();
+   136→    const now = ctx.currentTime;
+   137→    const loopDur = getLoopDuration();
+   138→    const lookahead = LOOKAHEAD_MS / 1000;
+   139→
+   140→    // Figure out where we are in the loop
+   141→    const elapsed = now - loopStartTime;
+   142→    const loopIter = Math.floor(elapsed / loopDur);
+   143→    const loopBase = loopStartTime + loopIter * loopDur;
+   144→
+   145→    // Walk through schedule and trigger anything within the lookahead window
+   146→    for (let si = nextEvent.strokeIdx; si &lt; schedule.length; si++) {
+   147→      const ss = schedule[si];
+   148→      const rawDur = (ss.points[ss.points.length - 1].timestamp - ss.points[0].timestamp) / 1000;
+   149→      const timeScale = rawDur &gt; 0 ? ss.duration / rawDur : 1;
+   150→
+   151→      const startPt = si === nextEvent.strokeIdx ? nextEvent.pointIdx : 0;
+   152→      for (let pi = startPt; pi &lt; ss.points.length; pi++) {
+   153→        // When should this point play?
+   154→        const pointOffsetInStroke = ((ss.points[pi].timestamp - ss.points[0].timestamp) / 1000) * timeScale;
+   155→        let absTime = loopBase + ss.startOffset + pointOffsetInStroke;
+   156→
+   157→        // If it&#x27;s already past in this loop iteration, try next
+   158→        if (absTime &lt; now - 0.01) {
+   159→          absTime += loopDur;
+   160→        }
+   161→
+   162→        if (absTime &gt; now + lookahead) {
+   163→          // Save position for next scheduling pass
+   164→          nextEvent = { strokeIdx: si, pointIdx: pi };
+   165→          return;
+   166→        }
+   167→
+   168→        if (absTime &gt;= now - 0.01) {
+   169→          triggerStrokeVoice(ss, pi, Math.max(absTime, now));
+   170→        }
+   171→      }
+   172→    }
+   173→
+   174→    // We&#x27;ve reached the end of the schedule — wrap to next loop
+   175→    nextEvent = { strokeIdx: 0, pointIdx: 0 };
+   176→    loopStartTime = loopBase + loopDur;
+   177→
+   178→    // Cleanup finished voices
+   179→    const cutoff = now - 0.5;
+   180→    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+   181→      if (activeVoices[i].stopTime &lt; cutoff) {
+   182→        activeVoices.splice(i, 1);
+   183→      }
+   184→    }
+   185→  }
+   186→
+   187→  function updateVisual() {
+   188→    if (!playing) return;
+   189→    const loopDur = getLoopDuration();
+   190→    const pos = loopPosition();
+   191→
+   192→    // Find which stroke is currently playing and use its average X for the playhead
+   193→    let visualX = pos / loopDur; // fallback: linear sweep
+   194→
+   195→    for (const ss of schedule) {
+   196→      if (pos &gt;= ss.startOffset &amp;&amp; pos &lt;= ss.startOffset + ss.duration) {
+   197→        // We&#x27;re inside this stroke — interpolate X from its points
+   198→        const t = (pos - ss.startOffset) / ss.duration;
+   199→        const pi = Math.min(Math.floor(t * (ss.points.length - 1)), ss.points.length - 1);
+   200→        visualX = ss.points[pi].x;
+   201→        break;
+   202→      }
+   203→    }
+   204→
+   205→    onPositionChange(visualX);
+   206→    animFrameId = requestAnimationFrame(updateVisual);
+   207→  }
+   208→
+   209→  function stopAllVoices() {
+   210→    for (const v of activeVoices) {
+   211→      v.voice.stop();
+   212→    }
+   213→    activeVoices.length = 0;
+   214→  }
+   215→
+   216→  return {
+   217→    start() {
+   218→      if (playing) return;
+   219→      playing = true;
+   220→      void ensureResumed();
+   221→
+   222→      schedule = buildSchedule();
+   223→      nextEvent = { strokeIdx: 0, pointIdx: 0 };
+   224→
+   225→      const ctx = getAudioContext();
+   226→      loopStartTime = ctx.currentTime;
+   227→
+   228→      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+   229→      scheduleAhead();
+   230→      animFrameId = requestAnimationFrame(updateVisual);
+   231→    },
+   232→
+   233→    stop() {
+   234→      if (!playing) return;
+   235→      playing = false;
+   236→      if (schedulerTimer !== null) {
+   237→        clearInterval(schedulerTimer);
+   238→        schedulerTimer = null;
+   239→      }
+   240→      if (animFrameId) {
+   241→        cancelAnimationFrame(animFrameId);
+   242→        animFrameId = 0;
+   243→      }
+   244→      stopAllVoices();
+   245→      schedule = [];
+   246→      onPositionChange(-1);
+   247→    },
+   248→
+   249→    isPlaying: () =&gt; playing,
+   250→    getPosition() {
+   251→      if (!playing) return 0;
+   252→      return loopPosition() / getLoopDuration();
+   253→    },
+   254→  };
+   255→}
+   256→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-31-098Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-31-098Z" class="timestamp-link"><time datetime="2026-03-23T18:10:31.098Z" data-timestamp="2026-03-23T18:10:31.098Z">2026-03-23T18:10:31.098Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I need to: (1) remove the <code>loopLengthMs</code>-based loop duration in favor of the computed total duration, (2) remove the visual playhead entirely, (3) remove the <code>onPositionChange</code> callback.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-46-700Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-46-700Z" class="timestamp-link"><time datetime="2026-03-23T18:10:46.700Z" data-timestamp="2026-03-23T18:10:46.700Z">2026-03-23T18:10:46.700Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01H1erQnKNpwEwvNKzBh5g1b">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">import type { BrushType, EraserTool, Painting, StrokePoint } from &#39;../types&#39;;
+import { getAudioContext, ensureResumed } from &#39;./engine&#39;;
+import { createVoice, type Voice } from &#39;./voices&#39;;
+import { voiceParamsFromColor, positionMod } from &#39;./mappings&#39;;
+import { getEffectChain } from &#39;./effects&#39;;
+import { debugParams } from &#39;../ui/debug&#39;;
+
+const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#39;scraper&#39;, &#39;solvent&#39;]);
+const LOOKAHEAD_MS = 80;
+const SCHEDULE_INTERVAL_MS = 30;
+
+export type Playhead = {
+  start: () =&gt; void;
+  stop: () =&gt; void;
+  isPlaying: () =&gt; boolean;
+};
+
+/**
+ * Stroke-replay: replays each stroke&#39;s recorded trajectory as sound,
+ * in the order they were painted, at their original speed, looping.
+ */
+export function createPlayhead(
+  getPainting: () =&gt; Painting,
+): Playhead {
+  let playing = false;
+  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+  let loopStartTime = 0;
+  let loopDuration = 0; // computed from strokes
+
+  type ScheduledStroke = {
+    strokeIndex: number;
+    startOffset: number;   // seconds from loop start
+    duration: number;      // seconds
+    points: readonly StrokePoint[];
+  };
+
+  let schedule: ScheduledStroke[] = [];
+  let nextEvent = { strokeIdx: 0, pointIdx: 0 };
+
+  type ActiveReplayVoice = {
+    voice: Voice;
+    stopTime: number;
+  };
+  const activeVoices: ActiveReplayVoice[] = [];
+
+  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+
+    const GAP = 0.08; // seconds between strokes
+    const items: ScheduledStroke[] = [];
+    let offset = 0;
+
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const pts = strokes[i].points;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      items.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: dur,
+        points: pts,
+      });
+      offset += dur + GAP;
+    }
+
+    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0);
+    return { items, totalDuration };
+  }
+
+  function triggerStrokeVoice(
+    ss: ScheduledStroke,
+    pointIdx: number,
+    when: number,
+  ) {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    const stroke = strokes[ss.strokeIndex];
+    if (!stroke) return;
+
+    const point = ss.points[pointIdx];
+    const params = voiceParamsFromColor(stroke.color);
+    const mod = positionMod(point);
+
+    // Voice stealing
+    while (activeVoices.length &gt;= debugParams.maxVoices) {
+      const oldest = activeVoices.shift()!;
+      oldest.voice.stop();
+    }
+
+    const voice = createVoice(params, mod, point.pressure);
+    const chain = getEffectChain(stroke.brush);
+    voice.output.connect(chain.input);
+
+    // Voice duration: time until next point
+    let voiceDur: number;
+    if (pointIdx &lt; ss.points.length - 1) {
+      voiceDur = (ss.points[pointIdx + 1].timestamp - point.timestamp) / 1000;
+      voiceDur = Math.max(voiceDur, 0.02);
+    } else {
+      voiceDur = 0.08; // last point — short tail
+    }
+
+    const stopTime = when + voiceDur * debugParams.voiceOverlap;
+    voice.stop(stopTime);
+    activeVoices.push({ voice, stopTime });
+  }
+
+  function scheduleAhead() {
+    if (schedule.length === 0) return;
+
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const lookahead = LOOKAHEAD_MS / 1000;
+
+    const elapsed = now - loopStartTime;
+    const loopIter = Math.floor(elapsed / loopDuration);
+    const loopBase = loopStartTime + loopIter * loopDuration;
+
+    for (let si = nextEvent.strokeIdx; si &lt; schedule.length; si++) {
+      const ss = schedule[si];
+
+      const startPt = si === nextEvent.strokeIdx ? nextEvent.pointIdx : 0;
+      for (let pi = startPt; pi &lt; ss.points.length; pi++) {
+        const pointOffset = (ss.points[pi].timestamp - ss.points[0].timestamp) / 1000;
+        let absTime = loopBase + ss.startOffset + pointOffset;
+
+        if (absTime &lt; now - 0.01) {
+          absTime += loopDuration;
+        }
+
+        if (absTime &gt; now + lookahead) {
+          nextEvent = { strokeIdx: si, pointIdx: pi };
+          return;
+        }
+
+        if (absTime &gt;= now - 0.01) {
+          triggerStrokeVoice(ss, pi, Math.max(absTime, now));
+        }
+      }
+    }
+
+    // Wrap to next loop
+    nextEvent = { strokeIdx: 0, pointIdx: 0 };
+    loopStartTime = loopBase + loopDuration;
+
+    // Cleanup finished voices
+    const cutoff = now - 0.5;
+    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+      if (activeVoices[i].stopTime &lt; cutoff) {
+        activeVoices.splice(i, 1);
+      }
+    }
+  }
+
+  function stopAllVoices() {
+    for (const v of activeVoices) {
+      v.voice.stop();
+    }
+    activeVoices.length = 0;
+  }
+
+  return {
+    start() {
+      if (playing) return;
+      playing = true;
+      void ensureResumed();
+
+      const built = buildSchedule();
+      schedule = built.items;
+      loopDuration = built.totalDuration;
+      if (loopDuration &lt;= 0) {
+        playing = false;
+        return;
+      }
+
+      nextEvent = { strokeIdx: 0, pointIdx: 0 };
+      loopStartTime = getAudioContext().currentTime;
+
+      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+      scheduleAhead();
+    },
+
+    stop() {
+      if (!playing) return;
+      playing = false;
+      if (schedulerTimer !== null) {
+        clearInterval(schedulerTimer);
+        schedulerTimer = null;
+      }
+      stopAllVoices();
+      schedule = [];
+    },
+
+    isPlaying: () =&gt; playing,
+  };
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-10-46-708Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-10-46-708Z" class="timestamp-link"><time datetime="2026-03-23T18:10:46.708Z" data-timestamp="2026-03-23T18:10:46.708Z">2026-03-23T18:10:46.708Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-50-248Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-50-248Z" class="timestamp-link"><time datetime="2026-03-23T18:10:50.248Z" data-timestamp="2026-03-23T18:10:50.248Z">2026-03-23T18:10:50.248Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update <code>main.ts</code> — remove the playhead position callback and the visual playhead references:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-51-908Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-51-908Z" class="timestamp-link"><time datetime="2026-03-23T18:10:51.908Z" data-timestamp="2026-03-23T18:10:51.908Z">2026-03-23T18:10:51.908Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_016RTkHt56S3FJi5mesb6ogK">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/main.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const playhead = createPlayhead(
+  () =&gt; painting,
+  (x) =&gt; renderer.setPlayheadPosition(x &gt;= 0 ? x : null),
+);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const playhead = createPlayhead(() =&gt; painting);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-10-51-926Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-10-51-926Z" class="timestamp-link"><time datetime="2026-03-23T18:10:51.926Z" data-timestamp="2026-03-23T18:10:51.926Z">2026-03-23T18:10:51.926Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/main.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-55-273Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-55-273Z" class="timestamp-link"><time datetime="2026-03-23T18:10:55.273Z" data-timestamp="2026-03-23T18:10:55.273Z">2026-03-23T18:10:55.273Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now check if <code>setPlayheadPosition</code> and <code>getPlayheadPosition</code> are used anywhere else:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-10-56-071Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-10-56-071Z" class="timestamp-link"><time datetime="2026-03-23T18:10:56.071Z" data-timestamp="2026-03-23T18:10:56.071Z">2026-03-23T18:10:56.071Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01X5LKRhokvw8zEU4NUUfDmZ"><div class="tool-header"><span class="tool-icon">⚙</span> Grep</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;pattern&#34;: &#34;PlayheadPosition|playheadX|playhead.*line&#34;,
+  &#34;output_mode&#34;: &#34;files_with_matches&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-10-56-093Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-10-56-093Z" class="timestamp-link"><time datetime="2026-03-23T18:10:56.093Z" data-timestamp="2026-03-23T18:10:56.093Z">2026-03-23T18:10:56.093Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Found 2 files
+src/canvas/renderer.ts
+PLAN.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-11-00-343Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-11-00-343Z" class="timestamp-link"><time datetime="2026-03-23T18:11:00.343Z" data-timestamp="2026-03-23T18:11:00.343Z">2026-03-23T18:11:00.343Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The renderer still has the playhead drawing code — I'll leave it in place since it's harmless (nothing sets <code>playheadX</code> anymore so it stays <code>null</code>). Let me type-check:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-11-00-977Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-11-00-977Z" class="timestamp-link"><time datetime="2026-03-23T18:11:00.977Z" data-timestamp="2026-03-23T18:11:00.977Z">2026-03-23T18:11:00.977Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01SKYFGcc2pA3xQkHvsM1L2C">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-11-28-954Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-11-28-954Z" class="timestamp-link"><time datetime="2026-03-23T18:11:28.954Z" data-timestamp="2026-03-23T18:11:28.954Z">2026-03-23T18:11:28.954Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-11-33-333Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-11-33-333Z" class="timestamp-link"><time datetime="2026-03-23T18:11:33.333Z" data-timestamp="2026-03-23T18:11:33.333Z">2026-03-23T18:11:33.333Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Clean. The replay now:</p>
+<ul>
+<li>Plays each stroke at its <strong>original recorded speed</strong> — no stretching to fit a fixed loop</li>
+<li>Loop duration is exactly the sum of all stroke durations + tiny gaps</li>
+<li>No visual playhead line appears on the canvas</li>
+</ul></div></div></div>
+<div class="message user" id="msg-2026-03-23T18-12-58-493Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T18-12-58-493Z" class="timestamp-link"><time datetime="2026-03-23T18:12:58.493Z" data-timestamp="2026-03-23T18:12:58.493Z">2026-03-23T18:12:58.493Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Let's add 2-3 seconds of silence at the end of the playback before it loops.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-13-02-794Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-13-02-794Z" class="timestamp-link"><time datetime="2026-03-23T18:13:02.794Z" data-timestamp="2026-03-23T18:13:02.794Z">2026-03-23T18:13:02.794Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01UhHQPzqUEWBo7cetLuaXHs">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0);
+    return { items, totalDuration };</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0) + 2.5;
+    return { items, totalDuration };</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-13-02-808Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-13-02-808Z" class="timestamp-link"><time datetime="2026-03-23T18:13:02.808Z" data-timestamp="2026-03-23T18:13:02.808Z">2026-03-23T18:13:02.808Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-13-06-159Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-13-06-159Z" class="timestamp-link"><time datetime="2026-03-23T18:13:06.159Z" data-timestamp="2026-03-23T18:13:06.159Z">2026-03-23T18:13:06.159Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>2.5 seconds of silence before the loop restarts.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T18-31-44-395Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T18-31-44-395Z" class="timestamp-link"><time datetime="2026-03-23T18:31:44.395Z" data-timestamp="2026-03-23T18:31:44.395Z">2026-03-23T18:31:44.395Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Painting a line makes one sound but replaying it makes a slightly different one...</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-31-49-897Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-31-49-897Z" class="timestamp-link"><time datetime="2026-03-23T18:31:49.897Z" data-timestamp="2026-03-23T18:31:49.897Z">2026-03-23T18:31:49.897Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-31-51-299Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-31-51-299Z" class="timestamp-link"><time datetime="2026-03-23T18:31:51.299Z" data-timestamp="2026-03-23T18:31:51.299Z">2026-03-23T18:31:51.299Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The live audition creates <strong>one voice per stroke</strong> and calls <code>updatePosition</code> as it moves. The replay creates <strong>a new voice for every point</strong>. Let me fix it to match the live behavior.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-32-09-456Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-32-09-456Z" class="timestamp-link"><time datetime="2026-03-23T18:32:09.456Z" data-timestamp="2026-03-23T18:32:09.456Z">2026-03-23T18:32:09.456Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01MECsw9HB6guBANusCv6Hqd">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">import type { BrushType, EraserTool, Painting, StrokePoint } from &#39;../types&#39;;
+import { getAudioContext, ensureResumed } from &#39;./engine&#39;;
+import { createVoice, type Voice } from &#39;./voices&#39;;
+import { voiceParamsFromColor, positionMod } from &#39;./mappings&#39;;
+import { getEffectChain } from &#39;./effects&#39;;
+import { debugParams } from &#39;../ui/debug&#39;;
+
+const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#39;scraper&#39;, &#39;solvent&#39;]);
+const LOOKAHEAD_MS = 80;
+const SCHEDULE_INTERVAL_MS = 30;
+
+export type Playhead = {
+  start: () =&gt; void;
+  stop: () =&gt; void;
+  isPlaying: () =&gt; boolean;
+};
+
+/**
+ * Stroke-replay: replays each stroke as a single continuous voice
+ * (matching live audition behavior), updating position along the
+ * recorded trajectory. Loops with a pause at the end.
+ */
+export function createPlayhead(
+  getPainting: () =&gt; Painting,
+): Playhead {
+  let playing = false;
+  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+  let loopStartTime = 0;
+  let loopDuration = 0;
+
+  type ScheduledStroke = {
+    strokeIndex: number;
+    startOffset: number;   // seconds from loop start
+    duration: number;      // seconds
+    points: readonly StrokePoint[];
+  };
+
+  let schedule: ScheduledStroke[] = [];
+
+  // Track which strokes have been started in the current loop iteration
+  let nextStrokeIdx = 0;
+
+  type ActiveStrokeVoice = {
+    voice: Voice;
+    ss: ScheduledStroke;
+    nextPointIdx: number;  // next point to use for updatePosition
+    stopTime: number;
+  };
+  const activeVoices: ActiveStrokeVoice[] = [];
+
+  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+
+    const GAP = 0.08;
+    const items: ScheduledStroke[] = [];
+    let offset = 0;
+
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const pts = strokes[i].points;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      items.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: dur,
+        points: pts,
+      });
+      offset += dur + GAP;
+    }
+
+    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0) + 2.5;
+    return { items, totalDuration };
+  }
+
+  function startStrokeVoice(ss: ScheduledStroke, when: number) {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    const stroke = strokes[ss.strokeIndex];
+    if (!stroke) return;
+
+    // Voice stealing
+    while (activeVoices.length &gt;= debugParams.maxVoices) {
+      const oldest = activeVoices.shift()!;
+      oldest.voice.stop();
+    }
+
+    const firstPoint = ss.points[0];
+    const params = voiceParamsFromColor(stroke.color);
+    const mod = positionMod(firstPoint);
+    const voice = createVoice(params, mod, 0.5);
+    const chain = getEffectChain(stroke.brush);
+    voice.output.connect(chain.input);
+
+    const stopTime = when + ss.duration;
+    voice.stop(stopTime);
+
+    activeVoices.push({ voice, ss, nextPointIdx: 1, stopTime });
+  }
+
+  function scheduleAhead() {
+    if (schedule.length === 0) return;
+
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const lookahead = LOOKAHEAD_MS / 1000;
+
+    const elapsed = now - loopStartTime;
+    const loopIter = Math.floor(elapsed / loopDuration);
+    const loopBase = loopStartTime + loopIter * loopDuration;
+
+    // Start new stroke voices that fall within the lookahead window
+    for (let si = nextStrokeIdx; si &lt; schedule.length; si++) {
+      const ss = schedule[si];
+      let absTime = loopBase + ss.startOffset;
+
+      if (absTime &lt; now - 0.01) {
+        absTime += loopDuration;
+      }
+
+      if (absTime &gt; now + lookahead) {
+        nextStrokeIdx = si;
+        break;
+      }
+
+      if (absTime &gt;= now - 0.01) {
+        startStrokeVoice(ss, Math.max(absTime, now));
+      }
+
+      if (si === schedule.length - 1) {
+        // All strokes scheduled for this loop — prepare for next
+        nextStrokeIdx = 0;
+        loopStartTime = loopBase + loopDuration;
+      }
+    }
+
+    // Update position on active voices based on elapsed time
+    for (const av of activeVoices) {
+      const ss = av.ss;
+      const strokeStart = loopBase + ss.startOffset;
+      const strokeElapsed = now - strokeStart;
+
+      if (strokeElapsed &lt; 0) continue; // not started yet
+
+      // Find the point that corresponds to current time
+      while (av.nextPointIdx &lt; ss.points.length) {
+        const pointTime = (ss.points[av.nextPointIdx].timestamp - ss.points[0].timestamp) / 1000;
+        if (pointTime &gt; strokeElapsed) break;
+
+        const mod = positionMod(ss.points[av.nextPointIdx]);
+        av.voice.updatePosition(mod);
+        av.nextPointIdx++;
+      }
+    }
+
+    // Cleanup finished voices
+    const cutoff = now - 0.5;
+    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+      if (activeVoices[i].stopTime &lt; cutoff) {
+        activeVoices.splice(i, 1);
+      }
+    }
+  }
+
+  function stopAllVoices() {
+    for (const v of activeVoices) {
+      v.voice.stop();
+    }
+    activeVoices.length = 0;
+  }
+
+  return {
+    start() {
+      if (playing) return;
+      playing = true;
+      void ensureResumed();
+
+      const built = buildSchedule();
+      schedule = built.items;
+      loopDuration = built.totalDuration;
+      if (loopDuration &lt;= 0) {
+        playing = false;
+        return;
+      }
+
+      nextStrokeIdx = 0;
+      loopStartTime = getAudioContext().currentTime;
+
+      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+      scheduleAhead();
+    },
+
+    stop() {
+      if (!playing) return;
+      playing = false;
+      if (schedulerTimer !== null) {
+        clearInterval(schedulerTimer);
+        schedulerTimer = null;
+      }
+      stopAllVoices();
+      schedule = [];
+    },
+
+    isPlaying: () =&gt; playing,
+  };
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-32-09-460Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-32-09-460Z" class="timestamp-link"><time datetime="2026-03-23T18:32:09.460Z" data-timestamp="2026-03-23T18:32:09.460Z">2026-03-23T18:32:09.460Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-32-13-019Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-32-13-019Z" class="timestamp-link"><time datetime="2026-03-23T18:32:13.019Z" data-timestamp="2026-03-23T18:32:13.019Z">2026-03-23T18:32:13.019Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Nw8XRubcfudfs2L5hrRJsZ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-34-29-179Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-34-29-179Z" class="timestamp-link"><time datetime="2026-03-23T18:34:29.179Z" data-timestamp="2026-03-23T18:34:29.179Z">2026-03-23T18:34:29.179Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-34-32-600Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-34-32-600Z" class="timestamp-link"><time datetime="2026-03-23T18:34:32.600Z" data-timestamp="2026-03-23T18:34:32.600Z">2026-03-23T18:34:32.600Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now replay matches live audition: one voice per stroke, created at stroke start with <code>positionMod</code> from the first point, then <code>updatePosition</code> called as each recorded point's timestamp is reached — exactly mirroring what happens when you paint.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T18-37-09-571Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T18-37-09-571Z" class="timestamp-link"><time datetime="2026-03-23T18:37:09.571Z" data-timestamp="2026-03-23T18:37:09.571Z">2026-03-23T18:37:09.571Z</time></a></div><div class="message-content">
+<div class="user-content"><p>The first replay is the right fidelity. Subsequent loops sound odd -- maybe too compressed.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-37-20-227Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-37-20-227Z" class="timestamp-link"><time datetime="2026-03-23T18:37:20.227Z" data-timestamp="2026-03-23T18:37:20.227Z">2026-03-23T18:37:20.227Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-37-21-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-37-21-196Z" class="timestamp-link"><time datetime="2026-03-23T18:37:21.196Z" data-timestamp="2026-03-23T18:37:21.196Z">2026-03-23T18:37:21.196Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The issue is in the loop-wrap logic. When the loop restarts, old voices are still in <code>activeVoices</code> and their <code>strokeElapsed</code> gets calculated against the new <code>loopBase</code>, which corrupts their position updates. Also the wrap detection is fragile. Let me fix it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-37-37-234Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-37-37-234Z" class="timestamp-link"><time datetime="2026-03-23T18:37:37.234Z" data-timestamp="2026-03-23T18:37:37.234Z">2026-03-23T18:37:37.234Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01NB3fdtig8dMmpXAByzdbBA">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">import type { BrushType, EraserTool, Painting, StrokePoint } from &#39;../types&#39;;
+import { getAudioContext, ensureResumed } from &#39;./engine&#39;;
+import { createVoice, type Voice } from &#39;./voices&#39;;
+import { voiceParamsFromColor, positionMod } from &#39;./mappings&#39;;
+import { getEffectChain } from &#39;./effects&#39;;
+import { debugParams } from &#39;../ui/debug&#39;;
+
+const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#39;scraper&#39;, &#39;solvent&#39;]);
+const LOOKAHEAD_MS = 80;
+const SCHEDULE_INTERVAL_MS = 30;
+
+export type Playhead = {
+  start: () =&gt; void;
+  stop: () =&gt; void;
+  isPlaying: () =&gt; boolean;
+};
+
+/**
+ * Stroke-replay: replays each stroke as a single continuous voice
+ * (matching live audition behavior), updating position along the
+ * recorded trajectory. Loops with a pause at the end.
+ */
+export function createPlayhead(
+  getPainting: () =&gt; Painting,
+): Playhead {
+  let playing = false;
+  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+  let loopStartTime = 0;
+  let loopDuration = 0;
+
+  type ScheduledStroke = {
+    strokeIndex: number;
+    startOffset: number;   // seconds from loop start
+    duration: number;      // seconds
+    points: readonly StrokePoint[];
+  };
+
+  let schedule: ScheduledStroke[] = [];
+  let nextStrokeIdx = 0;
+
+  type ActiveStrokeVoice = {
+    voice: Voice;
+    ss: ScheduledStroke;
+    voiceStartTime: number; // absolute AudioContext time when voice started
+    nextPointIdx: number;
+    stopTime: number;
+  };
+  const activeVoices: ActiveStrokeVoice[] = [];
+
+  function buildSchedule(): { items: ScheduledStroke[]; totalDuration: number } {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return { items: [], totalDuration: 0 };
+
+    const GAP = 0.08;
+    const items: ScheduledStroke[] = [];
+    let offset = 0;
+
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const pts = strokes[i].points;
+      const dur = Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+      items.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: dur,
+        points: pts,
+      });
+      offset += dur + GAP;
+    }
+
+    const totalDuration = offset - (strokes.length &gt; 1 ? GAP : 0) + 2.5;
+    return { items, totalDuration };
+  }
+
+  function startStrokeVoice(ss: ScheduledStroke, when: number) {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    const stroke = strokes[ss.strokeIndex];
+    if (!stroke) return;
+
+    // Voice stealing
+    while (activeVoices.length &gt;= debugParams.maxVoices) {
+      const oldest = activeVoices.shift()!;
+      oldest.voice.stop();
+    }
+
+    const firstPoint = ss.points[0];
+    const params = voiceParamsFromColor(stroke.color);
+    const mod = positionMod(firstPoint);
+    const voice = createVoice(params, mod, 0.5);
+    const chain = getEffectChain(stroke.brush);
+    voice.output.connect(chain.input);
+
+    const stopTime = when + ss.duration;
+    voice.stop(stopTime);
+
+    activeVoices.push({ voice, ss, voiceStartTime: when, nextPointIdx: 1, stopTime });
+  }
+
+  function scheduleAhead() {
+    if (schedule.length === 0) return;
+
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const lookahead = LOOKAHEAD_MS / 1000;
+
+    // Check if we need to start a new loop
+    if (now &gt;= loopStartTime + loopDuration - lookahead &amp;&amp; nextStrokeIdx &gt;= schedule.length) {
+      // Reset for the next loop
+      loopStartTime += loopDuration;
+      nextStrokeIdx = 0;
+    }
+
+    // Start new stroke voices that fall within the lookahead window
+    while (nextStrokeIdx &lt; schedule.length) {
+      const ss = schedule[nextStrokeIdx];
+      const absTime = loopStartTime + ss.startOffset;
+
+      if (absTime &gt; now + lookahead) break;
+
+      if (absTime &gt;= now - 0.05) {
+        startStrokeVoice(ss, Math.max(absTime, now));
+      }
+      nextStrokeIdx++;
+    }
+
+    // Update position on active voices using their own start time
+    for (const av of activeVoices) {
+      const strokeElapsed = now - av.voiceStartTime;
+      if (strokeElapsed &lt; 0) continue;
+
+      while (av.nextPointIdx &lt; av.ss.points.length) {
+        const pointTime = (av.ss.points[av.nextPointIdx].timestamp - av.ss.points[0].timestamp) / 1000;
+        if (pointTime &gt; strokeElapsed) break;
+
+        const mod = positionMod(av.ss.points[av.nextPointIdx]);
+        av.voice.updatePosition(mod);
+        av.nextPointIdx++;
+      }
+    }
+
+    // Cleanup finished voices
+    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+      if (activeVoices[i].stopTime &lt; now - 0.5) {
+        activeVoices.splice(i, 1);
+      }
+    }
+  }
+
+  function stopAllVoices() {
+    for (const v of activeVoices) {
+      v.voice.stop();
+    }
+    activeVoices.length = 0;
+  }
+
+  return {
+    start() {
+      if (playing) return;
+      playing = true;
+      void ensureResumed();
+
+      const built = buildSchedule();
+      schedule = built.items;
+      loopDuration = built.totalDuration;
+      if (loopDuration &lt;= 0) {
+        playing = false;
+        return;
+      }
+
+      nextStrokeIdx = 0;
+      loopStartTime = getAudioContext().currentTime;
+
+      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+      scheduleAhead();
+    },
+
+    stop() {
+      if (!playing) return;
+      playing = false;
+      if (schedulerTimer !== null) {
+        clearInterval(schedulerTimer);
+        schedulerTimer = null;
+      }
+      stopAllVoices();
+      schedule = [];
+    },
+
+    isPlaying: () =&gt; playing,
+  };
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-37-37-239Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-37-37-239Z" class="timestamp-link"><time datetime="2026-03-23T18:37:37.239Z" data-timestamp="2026-03-23T18:37:37.239Z">2026-03-23T18:37:37.239Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-37-41-246Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-37-41-246Z" class="timestamp-link"><time datetime="2026-03-23T18:37:41.246Z" data-timestamp="2026-03-23T18:37:41.246Z">2026-03-23T18:37:41.246Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01LHK855FiMbpqDJEFQwjfua">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-37-55-277Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-37-55-277Z" class="timestamp-link"><time datetime="2026-03-23T18:37:55.277Z" data-timestamp="2026-03-23T18:37:55.277Z">2026-03-23T18:37:55.277Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-38-00-106Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-38-00-106Z" class="timestamp-link"><time datetime="2026-03-23T18:38:00.106Z" data-timestamp="2026-03-23T18:38:00.106Z">2026-03-23T18:38:00.106Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The key fix: each active voice now stores its own <code>voiceStartTime</code> (the absolute AudioContext time it was created), and position updates are calculated relative to that — not relative to <code>loopBase</code> which shifts on every loop. The loop-wrap logic is also cleaner: it just bumps <code>loopStartTime</code> forward and resets the stroke index.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T18-41-10-210Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T18-41-10-210Z" class="timestamp-link"><time datetime="2026-03-23T18:41:10.210Z" data-timestamp="2026-03-23T18:41:10.210Z">2026-03-23T18:41:10.210Z</time></a></div><div class="message-content">
+<div class="user-content"><p>This worked, until I manually added "pauseDuration". Now the first replay is the right fidelity. Subsequent loops sound odd -- maybe too compressed.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-41-37-642Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-41-37-642Z" class="timestamp-link"><time datetime="2026-03-23T18:41:37.642Z" data-timestamp="2026-03-23T18:41:37.642Z">2026-03-23T18:41:37.642Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-41-39-014Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-41-39-014Z" class="timestamp-link"><time datetime="2026-03-23T18:41:39.014Z" data-timestamp="2026-03-23T18:41:39.014Z">2026-03-23T18:41:39.014Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The problem is loop drift. When the loop resets via <code>loopStartTime += loopDuration</code>, if the scheduler fires slightly late, several strokes' absolute times are already in the past — they all get crammed to <code>now</code> simultaneously.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-41-39-773Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-41-39-773Z" class="timestamp-link"><time datetime="2026-03-23T18:41:39.773Z" data-timestamp="2026-03-23T18:41:39.773Z">2026-03-23T18:41:39.773Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_015vf1NnG45Z5H7a6ESx6ipB"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/playhead.ts&#34;,
+  &#34;offset&#34;: 95,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-41-39-797Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-41-39-797Z" class="timestamp-link"><time datetime="2026-03-23T18:41:39.797Z" data-timestamp="2026-03-23T18:41:39.797Z">2026-03-23T18:41:39.797Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    95→
+    96→    const stopTime = when + ss.duration;
+    97→    voice.stop(stopTime);
+    98→
+    99→    activeVoices.push({ voice, ss, voiceStartTime: when, nextPointIdx: 1, stopTime });
+   100→  }
+   101→
+   102→  function scheduleAhead() {
+   103→    if (schedule.length === 0) return;
+   104→
+   105→    const ctx = getAudioContext();
+   106→    const now = ctx.currentTime;
+   107→    const lookahead = LOOKAHEAD_MS / 1000;
+   108→
+   109→    // Check if we need to start a new loop
+   110→    if (now &gt;= loopStartTime + loopDuration - lookahead &amp;&amp; nextStrokeIdx &gt;= schedule.length) {
+   111→      // Reset for the next loop
+   112→      loopStartTime += loopDuration;
+   113→      nextStrokeIdx = 0;
+   114→    }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-41-44-401Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-41-44-401Z" class="timestamp-link"><time datetime="2026-03-23T18:41:44.401Z" data-timestamp="2026-03-23T18:41:44.401Z">2026-03-23T18:41:44.401Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01GnFzDzG58fr2gkAJG8zpbm">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">      // Reset for the next loop
+      loopStartTime += loopDuration;
+      nextStrokeIdx = 0;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">      // Reset for the next loop — use max to avoid drift catchup
+      loopStartTime = Math.max(loopStartTime + loopDuration, now);
+      nextStrokeIdx = 0;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-41-44-410Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-41-44-410Z" class="timestamp-link"><time datetime="2026-03-23T18:41:44.410Z" data-timestamp="2026-03-23T18:41:44.410Z">2026-03-23T18:41:44.410Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-41-48-230Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-41-48-230Z" class="timestamp-link"><time datetime="2026-03-23T18:41:48.230Z" data-timestamp="2026-03-23T18:41:48.230Z">2026-03-23T18:41:48.230Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>If the scheduler fires late and <code>now</code> has drifted past the theoretical next loop start, it now begins the new loop from <code>now</code> instead of trying to catch up — preserving the relative spacing between strokes.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-008.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

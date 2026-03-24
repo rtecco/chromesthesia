@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 9</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 9/14</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-008.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<span class="current">9</span>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-010.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-03-23T19-08-04-910Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T19-08-04-910Z" class="timestamp-link"><time datetime="2026-03-23T19:08:04.910Z" data-timestamp="2026-03-23T19:08:04.910Z">2026-03-23T19:08:04.910Z</time></a></div><div class="message-content">
+<div class="user-content"><p>How does erasing or drawing something new work during the Replay mode?</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-08-12-669Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-08-12-669Z" class="timestamp-link"><time datetime="2026-03-23T19:08:12.669Z" data-timestamp="2026-03-23T19:08:12.669Z">2026-03-23T19:08:12.669Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Right now, you can still draw/erase on the canvas while replay is running, but the replay schedule was built at the moment you hit Replay — it won't include anything you add or erase afterward. The new strokes get added to the <code>painting</code> data, but the schedule is a snapshot.</p>
+<p>So if you erase a stroke during replay, it disappears visually but keeps playing until you stop and restart replay.</p>
+<p>A few options:</p>
+<ol>
+<li><strong>Rebuild schedule on each loop</strong> — at the loop boundary (during the 1s pause), rebuild the schedule so the next loop reflects changes</li>
+<li><strong>Disable drawing during replay</strong> — simpler, forces a clear mode distinction</li>
+<li><strong>Leave as-is</strong> — the painting is the "score" and replay is a playback of that score at a point in time</li>
+</ol>
+<p>What feels right?</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T19-09-29-127Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T19-09-29-127Z" class="timestamp-link"><time datetime="2026-03-23T19:09:29.127Z" data-timestamp="2026-03-23T19:09:29.127Z">2026-03-23T19:09:29.127Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Maybe brush / erase input is disabled during Replay</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-32-292Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-32-292Z" class="timestamp-link"><time datetime="2026-03-23T19:09:32.292Z" data-timestamp="2026-03-23T19:09:32.292Z">2026-03-23T19:09:32.292Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_011aR1yznrNTauz4ZuizVqE9"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-09-32-304Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-09-32-304Z" class="timestamp-link"><time datetime="2026-03-23T19:09:32.304Z" data-timestamp="2026-03-23T19:09:32.304Z">2026-03-23T19:09:32.304Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { StrokePoint, Stroke, BrushType, PaletteColor } from &#x27;../types&#x27;;
+     2→
+     3→const ERASER_COLOR: PaletteColor = {
+     4→  name: &#x27;Eraser&#x27;,
+     5→  rgb: [0, 0, 0],
+     6→  hsl: [0, 0, 0],
+     7→};
+     8→
+     9→export type StrokeRecorderCallbacks = {
+    10→  onStrokeStart: (stroke: Stroke) =&gt; void;
+    11→  onStrokePoint: (strokeId: string, point: StrokePoint) =&gt; void;
+    12→  onStrokeEnd: (strokeId: string) =&gt; void;
+    13→  getActiveColor: () =&gt; PaletteColor | null;
+    14→  getActiveBrush: () =&gt; BrushType;
+    15→};
+    16→
+    17→export function initStrokeRecorder(
+    18→  canvas: HTMLCanvasElement,
+    19→  callbacks: StrokeRecorderCallbacks,
+    20→): () =&gt; void {
+    21→  let activeStroke: { id: string; startTime: number; points: StrokePoint[] } | null = null;
+    22→
+    23→  function normalizePoint(e: PointerEvent): StrokePoint {
+    24→    const rect = canvas.getBoundingClientRect();
+    25→    return {
+    26→      x: (e.clientX - rect.left) / rect.width,
+    27→      y: (e.clientY - rect.top) / rect.height,
+    28→      pressure: e.pressure &gt; 0 ? e.pressure : 0.5,
+    29→      timestamp: activeStroke ? performance.now() - activeStroke.startTime : 0,
+    30→    };
+    31→  }
+    32→
+    33→  function onPointerDown(e: PointerEvent) {
+    34→    if (e.button !== 0) return;
+    35→    canvas.setPointerCapture(e.pointerId);
+    36→
+    37→    const id = crypto.randomUUID();
+    38→    const startTime = performance.now();
+    39→    activeStroke = { id, startTime, points: [] };
+    40→    const point = normalizePoint(e);
+    41→    activeStroke.points.push(point);
+    42→
+    43→    const stroke: Stroke = {
+    44→      id,
+    45→      color: callbacks.getActiveColor() ?? ERASER_COLOR,
+    46→      brush: callbacks.getActiveBrush(),
+    47→      points: [point],
+    48→    };
+    49→    callbacks.onStrokeStart(stroke);
+    50→  }
+    51→
+    52→  function onPointerMove(e: PointerEvent) {
+    53→    if (!activeStroke) return;
+    54→    const point = normalizePoint(e);
+    55→    activeStroke.points.push(point);
+    56→    callbacks.onStrokePoint(activeStroke.id, point);
+    57→  }
+    58→
+    59→  function onPointerUp(_e: PointerEvent) {
+    60→    if (!activeStroke) return;
+    61→    callbacks.onStrokeEnd(activeStroke.id);
+    62→    activeStroke = null;
+    63→  }
+    64→
+    65→  canvas.addEventListener(&#x27;pointerdown&#x27;, onPointerDown);
+    66→  canvas.addEventListener(&#x27;pointermove&#x27;, onPointerMove);
+    67→  canvas.addEventListener(&#x27;pointerup&#x27;, onPointerUp);
+    68→  canvas.addEventListener(&#x27;pointercancel&#x27;, onPointerUp);
+    69→
+    70→  return () =&gt; {
+    71→    canvas.removeEventListener(&#x27;pointerdown&#x27;, onPointerDown);
+    72→    canvas.removeEventListener(&#x27;pointermove&#x27;, onPointerMove);
+    73→    canvas.removeEventListener(&#x27;pointerup&#x27;, onPointerUp);
+    74→    canvas.removeEventListener(&#x27;pointercancel&#x27;, onPointerUp);
+    75→  };
+    76→}
+    77→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-35-823Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-35-823Z" class="timestamp-link"><time datetime="2026-03-23T19:09:35.823Z" data-timestamp="2026-03-23T19:09:35.823Z">2026-03-23T19:09:35.823Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Simplest approach: give the stroke recorder a way to check if input is disabled, keyed off the audio mode.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-38-047Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-38-047Z" class="timestamp-link"><time datetime="2026-03-23T19:09:38.047Z" data-timestamp="2026-03-23T19:09:38.047Z">2026-03-23T19:09:38.047Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Q2HAxDRX6e3iDNAyLAEsdq">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">stroke-recorder.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  onStrokeStart: (stroke: Stroke) =&gt; void;
+  onStrokePoint: (strokeId: string, point: StrokePoint) =&gt; void;
+  onStrokeEnd: (strokeId: string) =&gt; void;
+  getActiveColor: () =&gt; PaletteColor | null;
+  getActiveBrush: () =&gt; BrushType;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  onStrokeStart: (stroke: Stroke) =&gt; void;
+  onStrokePoint: (strokeId: string, point: StrokePoint) =&gt; void;
+  onStrokeEnd: (strokeId: string) =&gt; void;
+  getActiveColor: () =&gt; PaletteColor | null;
+  getActiveBrush: () =&gt; BrushType;
+  isInputDisabled: () =&gt; boolean;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-09-38-056Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-09-38-056Z" class="timestamp-link"><time datetime="2026-03-23T19:09:38.056Z" data-timestamp="2026-03-23T19:09:38.056Z">2026-03-23T19:09:38.056Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-41-798Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-41-798Z" class="timestamp-link"><time datetime="2026-03-23T19:09:41.798Z" data-timestamp="2026-03-23T19:09:41.798Z">2026-03-23T19:09:41.798Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01RULx4hSTSYxjRnPLZeLNCw">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">stroke-recorder.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  function onPointerDown(e: PointerEvent) {
+    if (e.button !== 0) return;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  function onPointerDown(e: PointerEvent) {
+    if (e.button !== 0 || callbacks.isInputDisabled()) return;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-09-41-802Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-09-41-802Z" class="timestamp-link"><time datetime="2026-03-23T19:09:41.802Z" data-timestamp="2026-03-23T19:09:41.802Z">2026-03-23T19:09:41.802Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-45-130Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-45-130Z" class="timestamp-link"><time datetime="2026-03-23T19:09:45.130Z" data-timestamp="2026-03-23T19:09:45.130Z">2026-03-23T19:09:45.130Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now wire it up in main.ts:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-45-410Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-45-410Z" class="timestamp-link"><time datetime="2026-03-23T19:09:45.410Z" data-timestamp="2026-03-23T19:09:45.410Z">2026-03-23T19:09:45.410Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01D4EgbWaKP7LRs2Qqp37CWP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/main.ts&#34;,
+  &#34;offset&#34;: 57,
+  &#34;limit&#34;: 5
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-09-45-427Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-09-45-427Z" class="timestamp-link"><time datetime="2026-03-23T19:09:45.427Z" data-timestamp="2026-03-23T19:09:45.427Z">2026-03-23T19:09:45.427Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    57→
+    58→  onStrokeStart(stroke: Stroke) {
+    59→    const brushState = createBrushState(stroke.brush);
+    60→    let voice: Voice | null = null;
+    61→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-49-287Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-49-287Z" class="timestamp-link"><time datetime="2026-03-23T19:09:49.287Z" data-timestamp="2026-03-23T19:09:49.287Z">2026-03-23T19:09:49.287Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01F8u9xJquk1ShSAErkqKRjo">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/main.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  getActiveColor: () =&gt; controls.activeColor,
+  getActiveBrush: () =&gt; controls.activeBrush,</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  getActiveColor: () =&gt; controls.activeColor,
+  getActiveBrush: () =&gt; controls.activeBrush,
+  isInputDisabled: () =&gt; controls.audioMode === &#39;playhead&#39;,</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-09-49-301Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-09-49-301Z" class="timestamp-link"><time datetime="2026-03-23T19:09:49.301Z" data-timestamp="2026-03-23T19:09:49.301Z">2026-03-23T19:09:49.301Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/main.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-09-52-148Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-09-52-148Z" class="timestamp-link"><time datetime="2026-03-23T19:09:52.148Z" data-timestamp="2026-03-23T19:09:52.148Z">2026-03-23T19:09:52.148Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RjD2KGbvxocb5RfF9FDMwS">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-10-41-229Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-10-41-229Z" class="timestamp-link"><time datetime="2026-03-23T19:10:41.229Z" data-timestamp="2026-03-23T19:10:41.229Z">2026-03-23T19:10:41.229Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-10-44-263Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-10-44-263Z" class="timestamp-link"><time datetime="2026-03-23T19:10:44.263Z" data-timestamp="2026-03-23T19:10:44.263Z">2026-03-23T19:10:44.263Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Drawing and erasing are now disabled during replay mode. Clicking the canvas does nothing until you switch back to Live.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T19-12-06-710Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T19-12-06-710Z" class="timestamp-link"><time datetime="2026-03-23T19:12:06.710Z" data-timestamp="2026-03-23T19:12:06.710Z">2026-03-23T19:12:06.710Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Is there a crosshair indicator / icon like an "x" or something that can show that the brush input is disabled?</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-09-319Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-09-319Z" class="timestamp-link"><time datetime="2026-03-23T19:12:09.319Z" data-timestamp="2026-03-23T19:12:09.319Z">2026-03-23T19:12:09.319Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01ULjFMSXbYEyZgbyam29Vdb"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/style.css&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-12-09-343Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-12-09-343Z" class="timestamp-link"><time datetime="2026-03-23T19:12:09.343Z" data-timestamp="2026-03-23T19:12:09.343Z">2026-03-23T19:12:09.343Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→* {
+     2→  margin: 0;
+     3→  padding: 0;
+     4→  box-sizing: border-box;
+     5→}
+     6→
+     7→body {
+     8→  background: #faf9f6;
+     9→  font-family: system-ui, -apple-system, sans-serif;
+    10→  display: flex;
+    11→  justify-content: center;
+    12→  align-items: center;
+    13→  min-height: 100vh;
+    14→  color: #333;
+    15→}
+    16→
+    17→#app {
+    18→  display: flex;
+    19→  flex-direction: column;
+    20→  align-items: center;
+    21→  gap: 12px;
+    22→  padding: 16px;
+    23→  width: 100%;
+    24→  max-width: 960px;
+    25→}
+    26→
+    27→.toolbar {
+    28→  display: flex;
+    29→  gap: 16px;
+    30→  align-items: center;
+    31→  flex-wrap: wrap;
+    32→  justify-content: center;
+    33→}
+    34→
+    35→.toolbar-group {
+    36→  display: flex;
+    37→  gap: 6px;
+    38→  align-items: center;
+    39→}
+    40→
+    41→#canvas {
+    42→  width: 100%;
+    43→  aspect-ratio: 16 / 9;
+    44→  background: #fff;
+    45→  border-radius: 4px;
+    46→  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    47→  cursor: crosshair;
+    48→  touch-action: none;
+    49→}
+    50→
+    51→button {
+    52→  padding: 6px 14px;
+    53→  border: 1px solid #ccc;
+    54→  border-radius: 4px;
+    55→  background: #fff;
+    56→  font-size: 14px;
+    57→  cursor: pointer;
+    58→  transition: background 0.15s;
+    59→}
+    60→
+    61→button:hover {
+    62→  background: #f0efec;
+    63→}
+    64→
+    65→.swatch {
+    66→  width: 28px;
+    67→  height: 28px;
+    68→  border-radius: 50%;
+    69→  border: 2px solid transparent;
+    70→  padding: 0;
+    71→  cursor: pointer;
+    72→  transition: border-color 0.15s, transform 0.1s;
+    73→}
+    74→
+    75→.swatch:hover {
+    76→  transform: scale(1.15);
+    77→}
+    78→
+    79→.swatch.active {
+    80→  border-color: #333;
+    81→}
+    82→
+    83→.brush-btn {
+    84→  font-size: 12px;
+    85→  padding: 4px 10px;
+    86→}
+    87→
+    88→.brush-btn.active {
+    89→  background: #333;
+    90→  color: #fff;
+    91→  border-color: #333;
+    92→}
+    93→
+    94→.swatch.empty {
+    95→  background: transparent !important;
+    96→  border: 2px dashed #ccc;
+    97→}
+    98→
+    99→.swatch.empty:hover {
+   100→  border-color: #999;
+   101→}
+   102→
+   103→.toolbar-sep {
+   104→  width: 1px;
+   105→  height: 20px;
+   106→  background: #ddd;
+   107→  margin: 0 2px;
+   108→}
+   109→
+   110→.eraser-btn {
+   111→  color: #888;
+   112→  border-style: dashed;
+   113→}
+   114→
+   115→.eraser-btn.active {
+   116→  background: #666;
+   117→  color: #fff;
+   118→  border-style: solid;
+   119→  border-color: #666;
+   120→}
+   121→
+   122→.mode-toggle {
+   123→  display: flex;
+   124→  border: 1px solid #ccc;
+   125→  border-radius: 4px;
+   126→  overflow: hidden;
+   127→}
+   128→
+   129→.mode-btn {
+   130→  border: none;
+   131→  border-radius: 0;
+   132→  padding: 6px 14px;
+   133→  font-size: 13px;
+   134→  background: #fff;
+   135→  color: #888;
+   136→  transition: background 0.15s, color 0.15s;
+   137→}
+   138→
+   139→.mode-btn + .mode-btn {
+   140→  border-left: 1px solid #ccc;
+   141→}
+   142→
+   143→.mode-btn.active {
+   144→  background: #333;
+   145→  color: #fff;
+   146→}
+   147→
+   148→.mode-btn:hover:not(.active) {
+   149→  background: #f0efec;
+   150→  color: #555;
+   151→}
+   152→
+   153→.debug-toggle {
+   154→  position: fixed;
+   155→  bottom: 12px;
+   156→  right: 12px;
+   157→  width: 32px;
+   158→  height: 32px;
+   159→  padding: 0;
+   160→  font-size: 18px;
+   161→  border-radius: 50%;
+   162→  border: 1px solid #ccc;
+   163→  background: #fff;
+   164→  cursor: pointer;
+   165→  opacity: 0.5;
+   166→  transition: opacity 0.15s;
+   167→  z-index: 100;
+   168→}
+   169→
+   170→.debug-toggle:hover {
+   171→  opacity: 1;
+   172→}
+   173→
+   174→.debug-panel {
+   175→  position: fixed;
+   176→  bottom: 52px;
+   177→  right: 12px;
+   178→  width: 280px;
+   179→  max-height: 70vh;
+   180→  overflow-y: auto;
+   181→  background: #fff;
+   182→  border: 1px solid #ccc;
+   183→  border-radius: 6px;
+   184→  padding: 12px;
+   185→  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+   186→  z-index: 100;
+   187→  font-size: 12px;
+   188→}
+   189→
+   190→.debug-panel.hidden {
+   191→  display: none;
+   192→}
+   193→
+   194→.debug-heading {
+   195→  font-weight: 600;
+   196→  font-size: 13px;
+   197→  margin-bottom: 10px;
+   198→  color: #333;
+   199→}
+   200→
+   201→.debug-row {
+   202→  display: flex;
+   203→  align-items: center;
+   204→  gap: 6px;
+   205→  margin-bottom: 6px;
+   206→}
+   207→
+   208→.debug-label {
+   209→  flex: 0 0 110px;
+   210→  color: #666;
+   211→  font-size: 11px;
+   212→}
+   213→
+   214→.debug-slider {
+   215→  flex: 1;
+   216→  height: 4px;
+   217→  cursor: pointer;
+   218→}
+   219→
+   220→.debug-value {
+   221→  flex: 0 0 40px;
+   222→  text-align: right;
+   223→  font-family: monospace;
+   224→  font-size: 11px;
+   225→  color: #333;
+   226→}
+   227→
+   228→.debug-export {
+   229→  margin-top: 8px;
+   230→  width: 100%;
+   231→  font-size: 11px;
+   232→  padding: 4px 8px;
+   233→}
+   234→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-12-337Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-12-337Z" class="timestamp-link"><time datetime="2026-03-23T19:12:12.337Z" data-timestamp="2026-03-23T19:12:12.337Z">2026-03-23T19:12:12.337Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Simplest approach: toggle a CSS class on the canvas that swaps the cursor to <code>not-allowed</code>.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-14-601Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-14-601Z" class="timestamp-link"><time datetime="2026-03-23T19:12:14.601Z" data-timestamp="2026-03-23T19:12:14.601Z">2026-03-23T19:12:14.601Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_016W4BiEDREN7qdN2Ca81VAb">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">style.css</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/style.css</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">#canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: crosshair;
+  touch-action: none;
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">#canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+#canvas.input-disabled {
+  cursor: not-allowed;
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-12-14-623Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-12-14-623Z" class="timestamp-link"><time datetime="2026-03-23T19:12:14.623Z" data-timestamp="2026-03-23T19:12:14.623Z">2026-03-23T19:12:14.623Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/style.css has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-18-134Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-18-134Z" class="timestamp-link"><time datetime="2026-03-23T19:12:18.134Z" data-timestamp="2026-03-23T19:12:18.134Z">2026-03-23T19:12:18.134Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now toggle the class when the mode changes. The mode switch happens in <code>controls.ts</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-18-810Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-18-810Z" class="timestamp-link"><time datetime="2026-03-23T19:12:18.810Z" data-timestamp="2026-03-23T19:12:18.810Z">2026-03-23T19:12:18.810Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RNvHVCKTRJzcgm4feEVWnN"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/main.ts&#34;,
+  &#34;offset&#34;: 33,
+  &#34;limit&#34;: 25
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-12-18-831Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-12-18-831Z" class="timestamp-link"><time datetime="2026-03-23T19:12:18.831Z" data-timestamp="2026-03-23T19:12:18.831Z">2026-03-23T19:12:18.831Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    33→const canvas = document.getElementById(&#x27;canvas&#x27;) as HTMLCanvasElement;
+    34→const renderer = createRenderer(canvas);
+    35→
+    36→const playhead = createPlayhead(() =&gt; painting);
+    37→
+    38→const { state: controls, setMode } = initControls({
+    39→  onModeChange(mode: AudioMode) {
+    40→    if (mode === &#x27;playhead&#x27;) {
+    41→      playhead.start();
+    42→    } else {
+    43→      playhead.stop();
+    44→    }
+    45→  },
+    46→  onClear() {
+    47→    playhead.stop();
+    48→    painting = { ...painting, strokes: [] };
+    49→    activeStrokes.clear();
+    50→    renderer.clear();
+    51→  },
+    52→});
+    53→
+    54→initStrokeRecorder(canvas, {
+    55→  getActiveColor: () =&gt; controls.activeColor,
+    56→  getActiveBrush: () =&gt; controls.activeBrush,
+    57→  isInputDisabled: () =&gt; controls.audioMode === &#x27;playhead&#x27;,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-23-161Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-23-161Z" class="timestamp-link"><time datetime="2026-03-23T19:12:23.161Z" data-timestamp="2026-03-23T19:12:23.161Z">2026-03-23T19:12:23.161Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Lem7idGBjYkpmG8SEW3HJ5">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/main.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  onModeChange(mode: AudioMode) {
+    if (mode === &#39;playhead&#39;) {
+      playhead.start();
+    } else {
+      playhead.stop();
+    }
+  },</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  onModeChange(mode: AudioMode) {
+    canvas.classList.toggle(&#39;input-disabled&#39;, mode === &#39;playhead&#39;);
+    if (mode === &#39;playhead&#39;) {
+      playhead.start();
+    } else {
+      playhead.stop();
+    }
+  },</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-12-23-184Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-12-23-184Z" class="timestamp-link"><time datetime="2026-03-23T19:12:23.184Z" data-timestamp="2026-03-23T19:12:23.184Z">2026-03-23T19:12:23.184Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/main.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-26-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-26-196Z" class="timestamp-link"><time datetime="2026-03-23T19:12:26.196Z" data-timestamp="2026-03-23T19:12:26.196Z">2026-03-23T19:12:26.196Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RV16QnJW21dQqAb9Nr43Pb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-12-32-001Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-12-32-001Z" class="timestamp-link"><time datetime="2026-03-23T19:12:32.001Z" data-timestamp="2026-03-23T19:12:32.001Z">2026-03-23T19:12:32.001Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-12-35-252Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-12-35-252Z" class="timestamp-link"><time datetime="2026-03-23T19:12:35.252Z" data-timestamp="2026-03-23T19:12:35.252Z">2026-03-23T19:12:35.252Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The canvas now shows a <code>not-allowed</code> cursor (the circle with a line through it) during replay mode, and reverts to crosshair when you switch back to Live.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T19-13-18-583Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T19-13-18-583Z" class="timestamp-link"><time datetime="2026-03-23T19:13:18.583Z" data-timestamp="2026-03-23T19:13:18.583Z">2026-03-23T19:13:18.583Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Commit this.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-13-21-765Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-13-21-765Z" class="timestamp-link"><time datetime="2026-03-23T19:13:21.765Z" data-timestamp="2026-03-23T19:13:21.765Z">2026-03-23T19:13:21.765Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014S3suHRf155y632Qz5mDwZ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show working tree status</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git status</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-13-21-836Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-13-21-836Z" class="timestamp-link"><time datetime="2026-03-23T19:13:21.836Z" data-timestamp="2026-03-23T19:13:21.836Z">2026-03-23T19:13:21.836Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>On branch stage-5-polish
+Changes not staged for commit:
+	modified:   src/audio/playhead.ts
+	modified:   src/canvas/stroke-recorder.ts
+	modified:   src/main.ts
+	modified:   src/style.css
+
+Untracked files:
+	.claude/
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-13-22-174Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-13-22-174Z" class="timestamp-link"><time datetime="2026-03-23T19:13:22.174Z" data-timestamp="2026-03-23T19:13:22.174Z">2026-03-23T19:13:22.174Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01SPcniZHDTKWJmAcmkZAb8M">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show diff summary</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git diff --stat</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-13-22-228Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-13-22-228Z" class="timestamp-link"><time datetime="2026-03-23T19:13:22.228Z" data-timestamp="2026-03-23T19:13:22.228Z">2026-03-23T19:13:22.228Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> src/audio/playhead.ts         | 48 +++++++++++++++++++++++++++++++++++++++----
+ src/canvas/stroke-recorder.ts |  3 ++-
+ src/main.ts                   |  2 ++
+ src/style.css                 |  4 ++++
+ 4 files changed, 52 insertions(+), 5 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-13-22-476Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-13-22-476Z" class="timestamp-link"><time datetime="2026-03-23T19:13:22.476Z" data-timestamp="2026-03-23T19:13:22.476Z">2026-03-23T19:13:22.476Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Ht6CC7ineP2qddjy4Qpyyp">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show recent commits</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git log --oneline -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-13-22-514Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-13-22-514Z" class="timestamp-link"><time datetime="2026-03-23T19:13:22.514Z" data-timestamp="2026-03-23T19:13:22.514Z">2026-03-23T19:13:22.514Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>babebb2 Replace column-scanning playhead with stroke-replay system
+33168de Stage 5: Paint mixing, canvas grain, velocity width, keyboard shortcuts
+0d98518 Stage 4: Playhead loop, Live/Playhead toggle, debug panel</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-13-29-036Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-13-29-036Z" class="timestamp-link"><time datetime="2026-03-23T19:13:29.036Z" data-timestamp="2026-03-23T19:13:29.036Z">2026-03-23T19:13:29.036Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01F1XoHTn2XVi6oq4ur9CQZN">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit eraser-aware replay and input disabling</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add src/audio/playhead.ts src/canvas/stroke-recorder.ts src/main.ts src/style.css &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Skip mostly-erased strokes in replay, disable input during replay
+
+Strokes with &gt;50% of points covered by later eraser strokes are
+omitted from replay. Canvas input is blocked during replay mode
+with a not-allowed cursor indicator.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-13-39-295Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-13-39-295Z" class="timestamp-link"><time datetime="2026-03-23T19:13:39.295Z" data-timestamp="2026-03-23T19:13:39.295Z">2026-03-23T19:13:39.295Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">79e27fb</span> Skip mostly-erased strokes in replay, disable input during replay</div><pre>4 files changed, 52 insertions(+), 5 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-13-41-895Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-13-41-895Z" class="timestamp-link"><time datetime="2026-03-23T19:13:41.895Z" data-timestamp="2026-03-23T19:13:41.895Z">2026-03-23T19:13:41.895Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Committed as <code>79e27fb</code>.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T19-15-21-314Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T19-15-21-314Z" class="timestamp-link"><time datetime="2026-03-23T19:15:21.314Z" data-timestamp="2026-03-23T19:15:21.314Z">2026-03-23T19:15:21.314Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Can we add tweakable parameters for the color / tone model to the debug settings?</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-31-194Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-31-194Z" class="timestamp-link"><time datetime="2026-03-23T19:15:31.194Z" data-timestamp="2026-03-23T19:15:31.194Z">2026-03-23T19:15:31.194Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-31-673Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-31-673Z" class="timestamp-link"><time datetime="2026-03-23T19:15:31.673Z" data-timestamp="2026-03-23T19:15:31.673Z">2026-03-23T19:15:31.673Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check what's already tweakable vs hardcoded in the mappings.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-32-108Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-32-108Z" class="timestamp-link"><time datetime="2026-03-23T19:15:32.108Z" data-timestamp="2026-03-23T19:15:32.108Z">2026-03-23T19:15:32.108Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_019mevU4P2EHHN7a8Ut76xUM"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/mappings.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-32-144Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-32-144Z" class="timestamp-link"><time datetime="2026-03-23T19:15:32.144Z" data-timestamp="2026-03-23T19:15:32.144Z">2026-03-23T19:15:32.144Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { PaletteColor, StrokePoint } from &#x27;../types&#x27;;
+     2→import { clamp, lerp, scale } from &#x27;../utils/math&#x27;;
+     3→import { debugParams } from &#x27;../ui/debug&#x27;;
+     4→
+     5→// --- HSL-derived voice parameters ---
+     6→
+     7→export type VoiceParams = {
+     8→  baseFreq: number;
+     9→  oscillators: { type: OscillatorType; detuneRange: number; gainScale: number }[];
+    10→  filterType: BiquadFilterType;
+    11→  filterFreq: number;
+    12→  filterQ: number;
+    13→  noiseAmount: number;
+    14→  attackTime: number;
+    15→  releaseTime: number;
+    16→};
+    17→
+    18→// Hue regions (0-360):
+    19→//   0-60: red/orange — warm saws, brassy
+    20→//  60-180: yellow/green — mixed saw+triangle, reedy
+    21→// 180-270: blue/purple — triangles+sines, hollow/glassy
+    22→// 270-360: magenta/red — saws with high resonance
+    23→
+    24→export function voiceParamsFromColor(color: PaletteColor): VoiceParams {
+    25→  const [h, s, l] = color.hsl;
+    26→
+    27→  // Lightness → base pitch (light=high, dark=low) — wide range for drama
+    28→  const baseFreq = scale(l, 0, 100, debugParams.baseFreqMin, debugParams.baseFreqMax);
+    29→
+    30→  // Saturation → harmonic richness
+    31→  const richness = s / 100; // 0..1
+    32→  const detuneRange = lerp(2, debugParams.detuneMax, richness);
+    33→  const partialCount = richness &gt; 0.5 ? 4 : richness &gt; 0.25 ? 3 : 2;
+    34→
+    35→  // Hue → waveform character
+    36→  const warmth = hueWarmth(h); // 0=cool, 1=warm
+    37→  const primaryWave: OscillatorType = warmth &gt; 0.6 ? &#x27;sawtooth&#x27; : warmth &gt; 0.3 ? &#x27;triangle&#x27; : &#x27;sine&#x27;;
+    38→  const secondaryWave: OscillatorType = warmth &gt; 0.5 ? &#x27;square&#x27; : &#x27;triangle&#x27;;
+    39→
+    40→  const oscillators: VoiceParams[&#x27;oscillators&#x27;] = [];
+    41→  for (let i = 0; i &lt; partialCount; i++) {
+    42→    oscillators.push({
+    43→      type: i === 0 ? primaryWave : i === 1 ? secondaryWave : &#x27;sine&#x27;,
+    44→      detuneRange,
+    45→      gainScale: 1 / (i + 1), // each partial quieter
+    46→    });
+    47→  }
+    48→
+    49→  // Hue + saturation → filter character
+    50→  const filterType: BiquadFilterType = warmth &gt; 0.5 ? &#x27;highpass&#x27; : warmth &gt; 0.2 ? &#x27;bandpass&#x27; : &#x27;lowpass&#x27;;
+    51→  const filterFreq = lerp(400, 3000, warmth) * lerp(0.6, 1.4, l / 100);
+    52→  const filterQ = lerp(0.5, 8, richness);
+    53→
+    54→  // Noise: more for warm/saturated, less for cool/pure
+    55→  const noiseAmount = lerp(0.02, debugParams.noiseMax, warmth * richness);
+    56→
+    57→  return {
+    58→    baseFreq,
+    59→    oscillators,
+    60→    filterType,
+    61→    filterFreq,
+    62→    filterQ,
+    63→    noiseAmount,
+    64→    attackTime: lerp(0.01, 0.08, 1 - richness),
+    65→    releaseTime: lerp(0.05, 0.3, 1 - warmth),
+    66→  };
+    67→}
+    68→
+    69→// How &quot;warm&quot; a hue feels: reds/oranges/yellows are warm, blues/purples are cool
+    70→function hueWarmth(h: number): number {
+    71→  // Red=0/360 warm, orange=30 warmest, blue=240 coolest
+    72→  if (h &lt;= 60) return lerp(0.85, 1.0, h / 60);
+    73→  if (h &lt;= 120) return lerp(1.0, 0.5, (h - 60) / 60);
+    74→  if (h &lt;= 180) return lerp(0.5, 0.2, (h - 120) / 60);
+    75→  if (h &lt;= 270) return lerp(0.2, 0.0, (h - 180) / 90);
+    76→  return lerp(0.0, 0.85, (h - 270) / 90);
+    77→}
+    78→
+    79→// --- Position modulation ---
+    80→
+    81→export type PositionMod = {
+    82→  filterCutoffMul: number;  // multiply the base filter freq
+    83→  pitchShift: number;       // semitones offset
+    84→  brightness: number;       // 0..1, controls upper partial gain
+    85→  reverbMix: number;        // 0..1
+    86→};
+    87→
+    88→export function positionMod(point: StrokePoint): PositionMod {
+    89→  const x = clamp(point.x, 0, 1);
+    90→  const y = clamp(point.y, 0, 1);
+    91→
+    92→  const p = debugParams;
+    93→  return {
+    94→    filterCutoffMul: lerp(p.filterCutoffMin, p.filterCutoffMax, x * x),
+    95→    brightness: x,
+    96→    pitchShift: lerp(p.pitchShiftRange, -p.pitchShiftRange, y),
+    97→    reverbMix: lerp(p.reverbMixMin, p.reverbMixMax, y),
+    98→  };
+    99→}
+   100→
+   101→export function velocityFromPoints(prev: StrokePoint, curr: StrokePoint): number {
+   102→  const dx = curr.x - prev.x;
+   103→  const dy = curr.y - prev.y;
+   104→  const dt = Math.max(curr.timestamp - prev.timestamp, 1);
+   105→  const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+   106→  return clamp(speed * 500, 0, 1); // normalized 0..1
+   107→}
+   108→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-32-506Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-32-506Z" class="timestamp-link"><time datetime="2026-03-23T19:15:32.506Z" data-timestamp="2026-03-23T19:15:32.506Z">2026-03-23T19:15:32.506Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Wv6DWoah2Zvp8Vg7MTTYTz"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/debug.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-32-518Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-32-518Z" class="timestamp-link"><time datetime="2026-03-23T19:15:32.518Z" data-timestamp="2026-03-23T19:15:32.518Z">2026-03-23T19:15:32.518Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→export type DebugParams = {
+     2→  // Position modulation
+     3→  filterCutoffMin: number;
+     4→  filterCutoffMax: number;
+     5→  pitchShiftRange: number;    // semitones +/-
+     6→  reverbMixMin: number;
+     7→  reverbMixMax: number;
+     8→
+     9→  // Voice
+    10→  baseFreqMin: number;
+    11→  baseFreqMax: number;
+    12→  detuneMax: number;          // max cents at full saturation
+    13→  noiseMax: number;           // max noise amount at full warmth*saturation
+    14→  peakGain: number;
+    15→
+    16→  // Playhead
+    17→  voiceOverlap: number;       // column duration multiplier
+    18→  maxVoices: number;
+    19→
+    20→  // Master
+    21→  masterGain: number;
+    22→};
+    23→
+    24→export const debugParams: DebugParams = {
+    25→  filterCutoffMin: 0.08,
+    26→  filterCutoffMax: 6.0,
+    27→  pitchShiftRange: 14,
+    28→  reverbMixMin: 0.05,
+    29→  reverbMixMax: 0.9,
+    30→  baseFreqMin: 55,
+    31→  baseFreqMax: 880,
+    32→  detuneMax: 25,
+    33→  noiseMax: 0.25,
+    34→  peakGain: 0.2,
+    35→  voiceOverlap: 1.1,
+    36→  maxVoices: 16,
+    37→  masterGain: 0.7,
+    38→};
+    39→
+    40→type SliderDef = {
+    41→  key: keyof DebugParams;
+    42→  label: string;
+    43→  min: number;
+    44→  max: number;
+    45→  step: number;
+    46→};
+    47→
+    48→const SLIDERS: SliderDef[] = [
+    49→  { key: &#x27;masterGain&#x27;, label: &#x27;Master Gain&#x27;, min: 0, max: 1.5, step: 0.05 },
+    50→  { key: &#x27;peakGain&#x27;, label: &#x27;Voice Gain&#x27;, min: 0.01, max: 0.5, step: 0.01 },
+    51→  { key: &#x27;maxVoices&#x27;, label: &#x27;Max Voices&#x27;, min: 1, max: 32, step: 1 },
+    52→  { key: &#x27;voiceOverlap&#x27;, label: &#x27;Voice Overlap&#x27;, min: 0.5, max: 3.0, step: 0.1 },
+    53→  { key: &#x27;filterCutoffMin&#x27;, label: &#x27;Filter Min (X=0)&#x27;, min: 0.01, max: 1.0, step: 0.01 },
+    54→  { key: &#x27;filterCutoffMax&#x27;, label: &#x27;Filter Max (X=1)&#x27;, min: 1.0, max: 12.0, step: 0.5 },
+    55→  { key: &#x27;pitchShiftRange&#x27;, label: &#x27;Pitch Shift +/-&#x27;, min: 0, max: 24, step: 1 },
+    56→  { key: &#x27;reverbMixMin&#x27;, label: &#x27;Reverb Min (Y=0)&#x27;, min: 0, max: 0.5, step: 0.01 },
+    57→  { key: &#x27;reverbMixMax&#x27;, label: &#x27;Reverb Max (Y=1)&#x27;, min: 0.1, max: 1.0, step: 0.05 },
+    58→  { key: &#x27;baseFreqMin&#x27;, label: &#x27;Base Freq Min&#x27;, min: 20, max: 200, step: 5 },
+    59→  { key: &#x27;baseFreqMax&#x27;, label: &#x27;Base Freq Max&#x27;, min: 200, max: 2000, step: 20 },
+    60→  { key: &#x27;detuneMax&#x27;, label: &#x27;Detune Max (cents)&#x27;, min: 0, max: 50, step: 1 },
+    61→  { key: &#x27;noiseMax&#x27;, label: &#x27;Noise Max&#x27;, min: 0, max: 0.5, step: 0.01 },
+    62→];
+    63→
+    64→export function initDebugPanel(onMasterGainChange: (v: number) =&gt; void): void {
+    65→  const toggle = document.createElement(&#x27;button&#x27;);
+    66→  toggle.type = &#x27;button&#x27;;
+    67→  toggle.className = &#x27;debug-toggle&#x27;;
+    68→  toggle.textContent = &#x27;\u2699&#x27;; // gear icon
+    69→  toggle.title = &#x27;Audio debug parameters&#x27;;
+    70→
+    71→  const panel = document.createElement(&#x27;div&#x27;);
+    72→  panel.className = &#x27;debug-panel hidden&#x27;;
+    73→
+    74→  const heading = document.createElement(&#x27;div&#x27;);
+    75→  heading.className = &#x27;debug-heading&#x27;;
+    76→  heading.textContent = &#x27;Audio Parameters&#x27;;
+    77→  panel.appendChild(heading);
+    78→
+    79→  for (const def of SLIDERS) {
+    80→    const row = document.createElement(&#x27;div&#x27;);
+    81→    row.className = &#x27;debug-row&#x27;;
+    82→
+    83→    const label = document.createElement(&#x27;label&#x27;);
+    84→    label.className = &#x27;debug-label&#x27;;
+    85→    label.textContent = def.label;
+    86→
+    87→    const value = document.createElement(&#x27;span&#x27;);
+    88→    value.className = &#x27;debug-value&#x27;;
+    89→    value.textContent = String(debugParams[def.key]);
+    90→
+    91→    const input = document.createElement(&#x27;input&#x27;);
+    92→    input.type = &#x27;range&#x27;;
+    93→    input.className = &#x27;debug-slider&#x27;;
+    94→    input.min = String(def.min);
+    95→    input.max = String(def.max);
+    96→    input.step = String(def.step);
+    97→    input.value = String(debugParams[def.key]);
+    98→
+    99→    input.addEventListener(&#x27;input&#x27;, () =&gt; {
+   100→      const v = parseFloat(input.value);
+   101→      (debugParams as Record&lt;string, number&gt;)[def.key] = v;
+   102→      value.textContent = def.step &gt;= 1 ? String(v) : v.toFixed(2);
+   103→      if (def.key === &#x27;masterGain&#x27;) onMasterGainChange(v);
+   104→    });
+   105→
+   106→    row.appendChild(label);
+   107→    row.appendChild(input);
+   108→    row.appendChild(value);
+   109→    panel.appendChild(row);
+   110→  }
+   111→
+   112→  // Export button — logs current values to console for easy copy
+   113→  const exportBtn = document.createElement(&#x27;button&#x27;);
+   114→  exportBtn.type = &#x27;button&#x27;;
+   115→  exportBtn.className = &#x27;debug-export&#x27;;
+   116→  exportBtn.textContent = &#x27;Log values to console&#x27;;
+   117→  exportBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
+   118→    console.log(&#x27;Debug params:&#x27;, JSON.stringify(debugParams, null, 2));
+   119→  });
+   120→  panel.appendChild(exportBtn);
+   121→
+   122→  toggle.addEventListener(&#x27;click&#x27;, () =&gt; {
+   123→    panel.classList.toggle(&#x27;hidden&#x27;);
+   124→  });
+   125→
+   126→  document.getElementById(&#x27;app&#x27;)!.appendChild(toggle);
+   127→  document.getElementById(&#x27;app&#x27;)!.appendChild(panel);
+   128→}
+   129→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-37-695Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-37-695Z" class="timestamp-link"><time datetime="2026-03-23T19:15:37.695Z" data-timestamp="2026-03-23T19:15:37.695Z">2026-03-23T19:15:37.695Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Hardcoded values in <code>mappings.ts</code> that should be tweakable:</p>
+<ul>
+<li><strong>Filter freq range</strong>: <code>lerp(400, 3000, warmth)</code> — the base filter frequency band</li>
+<li><strong>Filter Q range</strong>: <code>lerp(0.5, 8, richness)</code> — resonance</li>
+<li><strong>Attack time range</strong>: <code>lerp(0.01, 0.08, ...)</code> — envelope</li>
+<li><strong>Release time range</strong>: <code>lerp(0.05, 0.3, ...)</code> — envelope</li>
+</ul></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-40-938Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-40-938Z" class="timestamp-link"><time datetime="2026-03-23T19:15:40.938Z" data-timestamp="2026-03-23T19:15:40.938Z">2026-03-23T19:15:40.938Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_0172KbCTeojYfvga12ey88PE">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">debug.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/ui/debug.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  // Playhead
+  voiceOverlap: number;       // column duration multiplier
+  maxVoices: number;
+
+  // Master
+  masterGain: number;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  // Color → tone
+  filterFreqMin: number;      // base filter freq at coolest hue
+  filterFreqMax: number;      // base filter freq at warmest hue
+  filterQMin: number;         // filter Q at lowest saturation
+  filterQMax: number;         // filter Q at highest saturation
+  attackMin: number;          // fastest attack (high saturation)
+  attackMax: number;          // slowest attack (low saturation)
+  releaseMin: number;         // fastest release (warm hue)
+  releaseMax: number;         // slowest release (cool hue)
+
+  // Replay
+  voiceOverlap: number;       // duration multiplier
+  maxVoices: number;
+
+  // Master
+  masterGain: number;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-40-943Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-40-943Z" class="timestamp-link"><time datetime="2026-03-23T19:15:40.943Z" data-timestamp="2026-03-23T19:15:40.943Z">2026-03-23T19:15:40.943Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/ui/debug.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-45-524Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-45-524Z" class="timestamp-link"><time datetime="2026-03-23T19:15:45.524Z" data-timestamp="2026-03-23T19:15:45.524Z">2026-03-23T19:15:45.524Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_016C4mpW3X2VK25fkdcaLoWB">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">debug.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/ui/debug.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  peakGain: 0.2,
+  voiceOverlap: 1.1,</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  peakGain: 0.2,
+  filterFreqMin: 400,
+  filterFreqMax: 3000,
+  filterQMin: 0.5,
+  filterQMax: 8,
+  attackMin: 0.01,
+  attackMax: 0.08,
+  releaseMin: 0.05,
+  releaseMax: 0.3,
+  voiceOverlap: 1.1,</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-45-540Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-45-540Z" class="timestamp-link"><time datetime="2026-03-23T19:15:45.540Z" data-timestamp="2026-03-23T19:15:45.540Z">2026-03-23T19:15:45.540Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/ui/debug.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-48-246Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-48-246Z" class="timestamp-link"><time datetime="2026-03-23T19:15:48.246Z" data-timestamp="2026-03-23T19:15:48.246Z">2026-03-23T19:15:48.246Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add the sliders:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-52-984Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-52-984Z" class="timestamp-link"><time datetime="2026-03-23T19:15:52.984Z" data-timestamp="2026-03-23T19:15:52.984Z">2026-03-23T19:15:52.984Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01LGbGVFPXAX2e8CiNKckvyf">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">debug.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/ui/debug.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  { key: &#39;detuneMax&#39;, label: &#39;Detune Max (cents)&#39;, min: 0, max: 50, step: 1 },
+  { key: &#39;noiseMax&#39;, label: &#39;Noise Max&#39;, min: 0, max: 0.5, step: 0.01 },
+];</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  { key: &#39;detuneMax&#39;, label: &#39;Detune Max (cents)&#39;, min: 0, max: 50, step: 1 },
+  { key: &#39;noiseMax&#39;, label: &#39;Noise Max&#39;, min: 0, max: 0.5, step: 0.01 },
+  { key: &#39;filterFreqMin&#39;, label: &#39;Tone Filter Lo&#39;, min: 100, max: 2000, step: 50 },
+  { key: &#39;filterFreqMax&#39;, label: &#39;Tone Filter Hi&#39;, min: 500, max: 8000, step: 100 },
+  { key: &#39;filterQMin&#39;, label: &#39;Tone Q Min&#39;, min: 0.1, max: 5, step: 0.1 },
+  { key: &#39;filterQMax&#39;, label: &#39;Tone Q Max&#39;, min: 1, max: 20, step: 0.5 },
+  { key: &#39;attackMin&#39;, label: &#39;Attack Fast&#39;, min: 0.001, max: 0.05, step: 0.001 },
+  { key: &#39;attackMax&#39;, label: &#39;Attack Slow&#39;, min: 0.02, max: 0.3, step: 0.01 },
+  { key: &#39;releaseMin&#39;, label: &#39;Release Fast&#39;, min: 0.01, max: 0.2, step: 0.01 },
+  { key: &#39;releaseMax&#39;, label: &#39;Release Slow&#39;, min: 0.05, max: 1.0, step: 0.05 },
+];</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-53-003Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-53-003Z" class="timestamp-link"><time datetime="2026-03-23T19:15:53.003Z" data-timestamp="2026-03-23T19:15:53.003Z">2026-03-23T19:15:53.003Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/ui/debug.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-55-662Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-55-662Z" class="timestamp-link"><time datetime="2026-03-23T19:15:55.662Z" data-timestamp="2026-03-23T19:15:55.662Z">2026-03-23T19:15:55.662Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now wire them into mappings.ts:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-15-57-929Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-15-57-929Z" class="timestamp-link"><time datetime="2026-03-23T19:15:57.929Z" data-timestamp="2026-03-23T19:15:57.929Z">2026-03-23T19:15:57.929Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_019sHZdhfQe1pwx4izyHPQ6t">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">mappings.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/mappings.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  const filterFreq = lerp(400, 3000, warmth) * lerp(0.6, 1.4, l / 100);
+  const filterQ = lerp(0.5, 8, richness);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  const filterFreq = lerp(debugParams.filterFreqMin, debugParams.filterFreqMax, warmth) * lerp(0.6, 1.4, l / 100);
+  const filterQ = lerp(debugParams.filterQMin, debugParams.filterQMax, richness);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-15-57-933Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-15-57-933Z" class="timestamp-link"><time datetime="2026-03-23T19:15:57.933Z" data-timestamp="2026-03-23T19:15:57.933Z">2026-03-23T19:15:57.933Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/mappings.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-16-02-025Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-16-02-025Z" class="timestamp-link"><time datetime="2026-03-23T19:16:02.025Z" data-timestamp="2026-03-23T19:16:02.025Z">2026-03-23T19:16:02.025Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FGUj7h5RDMAWhjQ4ZWBajj">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">mappings.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/mappings.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    attackTime: lerp(0.01, 0.08, 1 - richness),
+    releaseTime: lerp(0.05, 0.3, 1 - warmth),</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    attackTime: lerp(debugParams.attackMin, debugParams.attackMax, 1 - richness),
+    releaseTime: lerp(debugParams.releaseMin, debugParams.releaseMax, 1 - warmth),</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-16-02-029Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-16-02-029Z" class="timestamp-link"><time datetime="2026-03-23T19:16:02.029Z" data-timestamp="2026-03-23T19:16:02.029Z">2026-03-23T19:16:02.029Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/mappings.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-16-05-537Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-16-05-537Z" class="timestamp-link"><time datetime="2026-03-23T19:16:05.537Z" data-timestamp="2026-03-23T19:16:05.537Z">2026-03-23T19:16:05.537Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013TLzgzwJNXs2o2ixXd23L7">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T19-16-13-927Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T19-16-13-927Z" class="timestamp-link"><time datetime="2026-03-23T19:16:13.927Z" data-timestamp="2026-03-23T19:16:13.927Z">2026-03-23T19:16:13.927Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T19-16-19-573Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T19-16-19-573Z" class="timestamp-link"><time datetime="2026-03-23T19:16:19.573Z" data-timestamp="2026-03-23T19:16:19.573Z">2026-03-23T19:16:19.573Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. The debug panel now has 8 new sliders under "Color → tone":</p>
+<table>
+<thead>
+<tr>
+<th>Slider</th>
+<th>Controls</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tone Filter Lo</td>
+<td>Base filter freq for cool hues</td>
+<td>400 Hz</td>
+</tr>
+<tr>
+<td>Tone Filter Hi</td>
+<td>Base filter freq for warm hues</td>
+<td>3000 Hz</td>
+</tr>
+<tr>
+<td>Tone Q Min</td>
+<td>Filter resonance at low saturation</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>Tone Q Max</td>
+<td>Filter resonance at high saturation</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Attack Fast</td>
+<td>Attack time for high-saturation colors</td>
+<td>0.01s</td>
+</tr>
+<tr>
+<td>Attack Slow</td>
+<td>Attack time for low-saturation colors</td>
+<td>0.08s</td>
+</tr>
+<tr>
+<td>Release Fast</td>
+<td>Release time for warm hues</td>
+<td>0.05s</td>
+</tr>
+<tr>
+<td>Release Slow</td>
+<td>Release time for cool hues</td>
+<td>0.3s</td>
+</tr>
+</tbody>
+</table></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-008.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<span class="current">9</span>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-010.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

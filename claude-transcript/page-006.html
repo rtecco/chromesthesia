@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 6</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 6/14</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-005.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<span class="current">6</span>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-007.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-03-23T17-45-50-159Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T17-45-50-159Z" class="timestamp-link"><time datetime="2026-03-23T17:45:50.159Z" data-timestamp="2026-03-23T17:45:50.159Z">2026-03-23T17:45:50.159Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Look over Stage 5 -- what's left there that we haven't done?</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-45-54-178Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-45-54-178Z" class="timestamp-link"><time datetime="2026-03-23T17:45:54.178Z" data-timestamp="2026-03-23T17:45:54.178Z">2026-03-23T17:45:54.178Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RXPfC4bJzac6M9QG85bsVH"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/PLAN.md&#34;,
+  &#34;offset&#34;: 110,
+  &#34;limit&#34;: 12
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-45-54-206Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-45-54-206Z" class="timestamp-link"><time datetime="2026-03-23T17:45:54.206Z" data-timestamp="2026-03-23T17:45:54.206Z">2026-03-23T17:45:54.206Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   110→
+   111→### Stage 5: Polish (branch: `stage-5-polish`)
+   112→- Tune voice recipes, effects, envelopes until they sound great
+   113→- Smooth parameter interpolation (no zipper noise)
+   114→- Paint mixing visuals at stroke overlaps
+   115→- Subtle canvas grain texture on background
+   116→- Stroke width variation with velocity
+   117→- UI polish: hover states, active indicators
+   118→- Keyboard shortcuts: Space=play/stop, Escape=stop, Delete=clear
+   119→
+   120→### Stage 6: Sharing (branch: `stage-6-sharing`)
+   121→- Export `Painting` to JSON → anonymous GitHub Gist</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-46-03-909Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-46-03-909Z" class="timestamp-link"><time datetime="2026-03-23T17:46:03.909Z" data-timestamp="2026-03-23T17:46:03.909Z">2026-03-23T17:46:03.909Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Here's what's left in Stage 5 vs what we've already done:</p>
+<p><strong>Already done (via debug panel + earlier work):</strong>
+- Tune voice recipes / effects / envelopes — the debug panel lets you do this live, and we've already iterated on filter mapping, gain scaling, axis ranges
+- UI polish: hover states, active indicators — already in the CSS for swatches, brush buttons, mode toggle</p>
+<p><strong>Still to do:</strong>
+1. <strong>Smooth parameter interpolation</strong> — voices already use <code>linearRampToValueAtTime</code> for filter updates, so this is mostly covered. Could audit for any remaining abrupt jumps.
+2. <strong>Paint mixing visuals at stroke overlaps</strong> — use a composite operation so overlapping strokes blend like pigment (darker) rather than just layering alpha on alpha.
+3. <strong>Subtle canvas grain texture</strong> — faint noise pattern on the white background to simulate paper/canvas.
+4. <strong>Stroke width variation with velocity</strong> — fast strokes thinner, slow strokes thicker.
+5. <strong>Keyboard shortcuts</strong> — Space = toggle Live/Playhead, Escape = switch to Live, Delete = clear.</p>
+<p>Items 2–5 are all straightforward. Want me to go ahead with all of them, or skip/change any?</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T17-46-46-679Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T17-46-46-679Z" class="timestamp-link"><time datetime="2026-03-23T17:46:46.679Z" data-timestamp="2026-03-23T17:46:46.679Z">2026-03-23T17:46:46.679Z</time></a></div><div class="message-content">
+<div class="user-content"><p>2 - 5 first, then we'll revisi 1.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-46-50-924Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-46-50-924Z" class="timestamp-link"><time datetime="2026-03-23T17:46:50.924Z" data-timestamp="2026-03-23T17:46:50.924Z">2026-03-23T17:46:50.924Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Py6RTvsytEtCeGuUDfFs7Q"><div class="tool-header"><span class="tool-icon">⚙</span> TaskCreate</div><div class="tool-description">Paint mixing visuals, canvas grain texture, stroke width velocity variation, keyboard shortcuts. Branch: stage-5-polish</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;subject&#34;: &#34;Stage 5: Polish (items 2-5)&#34;,
+  &#34;activeForm&#34;: &#34;Polishing canvas and controls&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-46-50-965Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-46-50-965Z" class="timestamp-link"><time datetime="2026-03-23T17:46:50.965Z" data-timestamp="2026-03-23T17:46:50.965Z">2026-03-23T17:46:50.965Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Task #5 created successfully: Stage 5: Polish (items 2-5)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-46-54-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-46-54-196Z" class="timestamp-link"><time datetime="2026-03-23T17:46:54.196Z" data-timestamp="2026-03-23T17:46:54.196Z">2026-03-23T17:46:54.196Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GPQfzNuZ6S6suhoTwbjc1d"><div class="tool-header"><span class="tool-icon">⚙</span> TaskUpdate</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;taskId&#34;: &#34;5&#34;,
+  &#34;status&#34;: &#34;in_progress&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-46-54-216Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-46-54-216Z" class="timestamp-link"><time datetime="2026-03-23T17:46:54.216Z" data-timestamp="2026-03-23T17:46:54.216Z">2026-03-23T17:46:54.216Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Updated task #5 status</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-46-59-217Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-46-59-217Z" class="timestamp-link"><time datetime="2026-03-23T17:46:59.217Z" data-timestamp="2026-03-23T17:46:59.217Z">2026-03-23T17:46:59.217Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JAs8vswszMdhxgqJScg1ha">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Create stage-5-polish branch</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git checkout -b stage-5-polish</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-02-939Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-02-939Z" class="timestamp-link"><time datetime="2026-03-23T17:47:02.939Z" data-timestamp="2026-03-23T17:47:02.939Z">2026-03-23T17:47:02.939Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Switched to a new branch &#x27;stage-5-polish&#x27;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-06-865Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-06-865Z" class="timestamp-link"><time datetime="2026-03-23T17:47:06.865Z" data-timestamp="2026-03-23T17:47:06.865Z">2026-03-23T17:47:06.865Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me read the current brush and renderer code to plan the changes.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-07-699Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-07-699Z" class="timestamp-link"><time datetime="2026-03-23T17:47:07.699Z" data-timestamp="2026-03-23T17:47:07.699Z">2026-03-23T17:47:07.699Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_0173L3K4Sh9Jfj3RVVMsTi7q"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts&#34;,
+  &#34;offset&#34;: 1,
+  &#34;limit&#34;: 70
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-07-723Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-07-723Z" class="timestamp-link"><time datetime="2026-03-23T17:47:07.723Z" data-timestamp="2026-03-23T17:47:07.723Z">2026-03-23T17:47:07.723Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { BrushType, StrokePoint, PaletteColor } from &#x27;../types&#x27;;
+     2→import { clamp, lerp } from &#x27;../utils/math&#x27;;
+     3→
+     4→export type BrushRenderContext = {
+     5→  ctx: CanvasRenderingContext2D;
+     6→  color: PaletteColor;
+     7→  canvasWidth: number;
+     8→  canvasHeight: number;
+     9→};
+    10→
+    11→// Per-bristle persistent state for round brush
+    12→type Bristle = {
+    13→  offsetAngle: number;   // fixed angular position in the bundle
+    14→  offsetRadius: number;  // how far from center at rest
+    15→  thickness: number;     // individual bristle width
+    16→  opacity: number;       // individual bristle base opacity
+    17→  prevX: number;         // last drawn position (canvas px)
+    18→  prevY: number;
+    19→};
+    20→
+    21→export type BrushState = {
+    22→  bristles: Bristle[];
+    23→  segmentCount: number;  // how many segments drawn so far (for paint load fade)
+    24→};
+    25→
+    26→export function createBrushState(brush: BrushType): BrushState {
+    27→  const bristles: Bristle[] = [];
+    28→  if (brush === &#x27;oil-round&#x27;) {
+    29→    const count = 24;
+    30→    for (let i = 0; i &lt; count; i++) {
+    31→      bristles.push({
+    32→        offsetAngle: (i / count) * Math.PI * 2 + (pseudoRand(i, 0.5) - 0.5) * 0.4,
+    33→        offsetRadius: 0.3 + pseudoRand(i, 0.7) * 0.7,
+    34→        thickness: 0.8 + pseudoRand(i, 0.3) * 1.4,
+    35→        opacity: 0.3 + pseudoRand(i, 0.9) * 0.4,
+    36→        prevX: -1,
+    37→        prevY: -1,
+    38→      });
+    39→    }
+    40→  }
+    41→  return { bristles, segmentCount: 0 };
+    42→}
+    43→
+    44→type BrushRenderer = (
+    45→  rc: BrushRenderContext,
+    46→  prev: StrokePoint,
+    47→  curr: StrokePoint,
+    48→  state: BrushState,
+    49→) =&gt; void;
+    50→
+    51→function rgbStr(c: PaletteColor, alpha: number): string {
+    52→  const [r, g, b] = c.rgb;
+    53→  return `rgba(${r},${g},${b},${alpha})`;
+    54→}
+    55→
+    56→function strokeAngle(prev: StrokePoint, curr: StrokePoint): number {
+    57→  return Math.atan2(curr.y - prev.y, curr.x - prev.x);
+    58→}
+    59→
+    60→function strokeSpeed(prev: StrokePoint, curr: StrokePoint): number {
+    61→  const dx = curr.x - prev.x;
+    62→  const dy = curr.y - prev.y;
+    63→  const dt = Math.max(curr.timestamp - prev.timestamp, 1);
+    64→  return Math.sqrt(dx * dx + dy * dy) / dt;
+    65→}
+    66→
+    67→// Seeded-ish random from two floats, for deterministic bristle placement
+    68→function pseudoRand(a: number, b: number): number {
+    69→  const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+    70→  return x - Math.floor(x);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-07-726Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-07-726Z" class="timestamp-link"><time datetime="2026-03-23T17:47:07.726Z" data-timestamp="2026-03-23T17:47:07.726Z">2026-03-23T17:47:07.726Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01F76gEjHgpWcTZ6HVMvWwAb"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/renderer.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-07-737Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-07-737Z" class="timestamp-link"><time datetime="2026-03-23T17:47:07.737Z" data-timestamp="2026-03-23T17:47:07.737Z">2026-03-23T17:47:07.737Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { Stroke, StrokePoint } from &#x27;../types&#x27;;
+     2→import { renderSegment, type BrushRenderContext, type BrushState } from &#x27;./brushes&#x27;;
+     3→
+     4→export type CanvasRenderer = {
+     5→  readonly canvas: HTMLCanvasElement;
+     6→  readonly bufferCanvas: HTMLCanvasElement;
+     7→  clear: () =&gt; void;
+     8→  drawSegment: (stroke: Stroke, prev: StrokePoint, curr: StrokePoint, brushState: BrushState) =&gt; void;
+     9→  resize: () =&gt; void;
+    10→  getPlayheadPosition: () =&gt; number | null;
+    11→  setPlayheadPosition: (x: number | null) =&gt; void;
+    12→};
+    13→
+    14→export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
+    15→  const ctx = canvas.getContext(&#x27;2d&#x27;)!;
+    16→  const bufferCanvas = document.createElement(&#x27;canvas&#x27;);
+    17→  const bufferCtx = bufferCanvas.getContext(&#x27;2d&#x27;)!;
+    18→
+    19→  let playheadX: number | null = null;
+    20→
+    21→  function syncSize() {
+    22→    const dpr = window.devicePixelRatio || 1;
+    23→    const rect = canvas.getBoundingClientRect();
+    24→    const w = Math.round(rect.width * dpr);
+    25→    const h = Math.round(rect.height * dpr);
+    26→
+    27→    if (canvas.width !== w || canvas.height !== h) {
+    28→      // Save buffer contents before resize
+    29→      const tmpCanvas = document.createElement(&#x27;canvas&#x27;);
+    30→      tmpCanvas.width = bufferCanvas.width;
+    31→      tmpCanvas.height = bufferCanvas.height;
+    32→      const tmpCtx = tmpCanvas.getContext(&#x27;2d&#x27;)!;
+    33→      tmpCtx.drawImage(bufferCanvas, 0, 0);
+    34→
+    35→      canvas.width = w;
+    36→      canvas.height = h;
+    37→      bufferCanvas.width = w;
+    38→      bufferCanvas.height = h;
+    39→
+    40→      // Restore buffer contents scaled to new size
+    41→      if (tmpCanvas.width &gt; 0 &amp;&amp; tmpCanvas.height &gt; 0) {
+    42→        bufferCtx.drawImage(tmpCanvas, 0, 0, w, h);
+    43→      }
+    44→    }
+    45→  }
+    46→
+    47→  function compositeFrame() {
+    48→    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    49→    ctx.drawImage(bufferCanvas, 0, 0);
+    50→
+    51→    // Draw playhead
+    52→    if (playheadX !== null) {
+    53→      const px = playheadX * canvas.width;
+    54→      ctx.save();
+    55→      ctx.strokeStyle = &#x27;rgba(0, 0, 0, 0.25)&#x27;;
+    56→      ctx.lineWidth = 2;
+    57→      ctx.setLineDash([6, 4]);
+    58→      ctx.beginPath();
+    59→      ctx.moveTo(px, 0);
+    60→      ctx.lineTo(px, canvas.height);
+    61→      ctx.stroke();
+    62→      ctx.restore();
+    63→    }
+    64→
+    65→    requestAnimationFrame(compositeFrame);
+    66→  }
+    67→
+    68→  syncSize();
+    69→  compositeFrame();
+    70→
+    71→  return {
+    72→    canvas,
+    73→    bufferCanvas,
+    74→
+    75→    clear() {
+    76→      bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+    77→    },
+    78→
+    79→    drawSegment(stroke: Stroke, prev: StrokePoint, curr: StrokePoint, brushState: BrushState) {
+    80→      const rc: BrushRenderContext = {
+    81→        ctx: bufferCtx,
+    82→        color: stroke.color,
+    83→        canvasWidth: bufferCanvas.width,
+    84→        canvasHeight: bufferCanvas.height,
+    85→      };
+    86→      renderSegment(stroke.brush, rc, prev, curr, brushState);
+    87→    },
+    88→
+    89→    resize() {
+    90→      syncSize();
+    91→    },
+    92→
+    93→    getPlayheadPosition() {
+    94→      return playheadX;
+    95→    },
+    96→
+    97→    setPlayheadPosition(x: number | null) {
+    98→      playheadX = x;
+    99→    },
+   100→  };
+   101→}
+   102→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-11-145Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-11-145Z" class="timestamp-link"><time datetime="2026-03-23T17:47:11.145Z" data-timestamp="2026-03-23T17:47:11.145Z">2026-03-23T17:47:11.145Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me read the rest of brushes.ts for the full picture:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-11-452Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-11-452Z" class="timestamp-link"><time datetime="2026-03-23T17:47:11.452Z" data-timestamp="2026-03-23T17:47:11.452Z">2026-03-23T17:47:11.452Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XU3xPkvoH4xR2CytdyAngR"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts&#34;,
+  &#34;offset&#34;: 70,
+  &#34;limit&#34;: 180
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-11-477Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-11-477Z" class="timestamp-link"><time datetime="2026-03-23T17:47:11.477Z" data-timestamp="2026-03-23T17:47:11.477Z">2026-03-23T17:47:11.477Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    70→  return x - Math.floor(x);
+    71→}
+    72→
+    73→const oilFlat: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+    74→  const { ctx, color, canvasWidth, canvasHeight } = rc;
+    75→  const baseWidth = lerp(12, 30, curr.pressure) * (canvasWidth / 960);
+    76→  const angle = strokeAngle(prev, curr);
+    77→  const perpX = Math.cos(angle + Math.PI / 2);
+    78→  const perpY = Math.sin(angle + Math.PI / 2);
+    79→  const bristleCount = 12;
+    80→
+    81→  for (let i = 0; i &lt; bristleCount; i++) {
+    82→    const t = (i / (bristleCount - 1)) - 0.5; // -0.5 to 0.5
+    83→    const offsetX = perpX * t * baseWidth;
+    84→    const offsetY = perpY * t * baseWidth;
+    85→    const jitter = (pseudoRand(curr.x + i, curr.y) - 0.5) * 2;
+    86→
+    87→    ctx.beginPath();
+    88→    ctx.strokeStyle = rgbStr(color, lerp(0.3, 0.65, curr.pressure));
+    89→    ctx.lineWidth = lerp(1.5, 3, pseudoRand(i, curr.timestamp)) * (canvasWidth / 960);
+    90→    ctx.lineCap = &#x27;round&#x27;;
+    91→    ctx.moveTo(
+    92→      prev.x * canvasWidth + offsetX + jitter,
+    93→      prev.y * canvasHeight + offsetY + jitter,
+    94→    );
+    95→    ctx.lineTo(
+    96→      curr.x * canvasWidth + offsetX + jitter,
+    97→      curr.y * canvasHeight + offsetY + jitter,
+    98→    );
+    99→    ctx.stroke();
+   100→  }
+   101→};
+   102→
+   103→const oilRound: BrushRenderer = (rc, _prev, curr, state) =&gt; {
+   104→  const { ctx, color, canvasWidth, canvasHeight } = rc;
+   105→  const scale = canvasWidth / 960;
+   106→  const baseRadius = lerp(8, 22, curr.pressure) * scale;
+   107→  // Bristles splay outward under pressure
+   108→  const splay = lerp(0.3, 1.0, curr.pressure);
+   109→  const cx = curr.x * canvasWidth;
+   110→  const cy = curr.y * canvasHeight;
+   111→
+   112→  // Paint load fades over the stroke — starts thick, gets translucent
+   113→  const loadFade = clamp(1.0 - state.segmentCount / 300, 0.25, 1.0);
+   114→
+   115→  for (const bristle of state.bristles) {
+   116→    const bx = cx + Math.cos(bristle.offsetAngle) * bristle.offsetRadius * baseRadius * splay;
+   117→    const by = cy + Math.sin(bristle.offsetAngle) * bristle.offsetRadius * baseRadius * splay;
+   118→
+   119→    const alpha = bristle.opacity * loadFade * lerp(0.5, 1.0, curr.pressure);
+   120→
+   121→    ctx.beginPath();
+   122→    ctx.strokeStyle = rgbStr(color, alpha);
+   123→    ctx.lineWidth = bristle.thickness * scale;
+   124→    ctx.lineCap = &#x27;round&#x27;;
+   125→
+   126→    if (bristle.prevX &lt; 0) {
+   127→      // First segment — just a dot
+   128→      ctx.moveTo(bx, by);
+   129→      ctx.lineTo(bx + 0.5, by + 0.5);
+   130→    } else {
+   131→      // Drag from previous bristle position — this is what makes it feel physical
+   132→      ctx.moveTo(bristle.prevX, bristle.prevY);
+   133→      ctx.lineTo(bx, by);
+   134→    }
+   135→    ctx.stroke();
+   136→
+   137→    bristle.prevX = bx;
+   138→    bristle.prevY = by;
+   139→  }
+   140→
+   141→  state.segmentCount++;
+   142→};
+   143→
+   144→const paletteKnife: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+   145→  const { ctx, color, canvasWidth, canvasHeight } = rc;
+   146→  const speed = strokeSpeed(prev, curr);
+   147→  const width = lerp(20, 50, curr.pressure) * (canvasWidth / 960);
+   148→  const angle = strokeAngle(prev, curr);
+   149→  const stretch = Math.min(speed * 800, 2.5);
+   150→  const perpX = Math.cos(angle + Math.PI / 2);
+   151→  const perpY = Math.sin(angle + Math.PI / 2);
+   152→
+   153→  // Sharp-edged smear
+   154→  ctx.save();
+   155→  ctx.globalAlpha = lerp(0.15, 0.4, curr.pressure);
+   156→  ctx.fillStyle = `rgb(${color.rgb[0]},${color.rgb[1]},${color.rgb[2]})`;
+   157→
+   158→  ctx.beginPath();
+   159→  const hw = width / 2;
+   160→  ctx.moveTo(
+   161→    prev.x * canvasWidth - perpX * hw,
+   162→    prev.y * canvasHeight - perpY * hw,
+   163→  );
+   164→  ctx.lineTo(
+   165→    prev.x * canvasWidth + perpX * hw,
+   166→    prev.y * canvasHeight + perpY * hw,
+   167→  );
+   168→  ctx.lineTo(
+   169→    curr.x * canvasWidth + perpX * hw * (1 + stretch * 0.2),
+   170→    curr.y * canvasHeight + perpY * hw * (1 + stretch * 0.2),
+   171→  );
+   172→  ctx.lineTo(
+   173→    curr.x * canvasWidth - perpX * hw * (1 + stretch * 0.2),
+   174→    curr.y * canvasHeight - perpY * hw * (1 + stretch * 0.2),
+   175→  );
+   176→  ctx.closePath();
+   177→  ctx.fill();
+   178→  ctx.restore();
+   179→
+   180→  // Thin scrape lines for knife texture
+   181→  for (let i = 0; i &lt; 3; i++) {
+   182→    const t = (i / 2) - 0.5;
+   183→    ctx.beginPath();
+   184→    ctx.strokeStyle = rgbStr(color, 0.12);
+   185→    ctx.lineWidth = 0.5 * (canvasWidth / 960);
+   186→    ctx.moveTo(
+   187→      prev.x * canvasWidth + perpX * t * width,
+   188→      prev.y * canvasHeight + perpY * t * width,
+   189→    );
+   190→    ctx.lineTo(
+   191→      curr.x * canvasWidth + perpX * t * width,
+   192→      curr.y * canvasHeight + perpY * t * width,
+   193→    );
+   194→    ctx.stroke();
+   195→  }
+   196→};
+   197→
+   198→const dryBrush: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+   199→  const { ctx, color, canvasWidth, canvasHeight } = rc;
+   200→  const baseWidth = lerp(10, 35, curr.pressure) * (canvasWidth / 960);
+   201→  const angle = strokeAngle(prev, curr);
+   202→  const perpX = Math.cos(angle + Math.PI / 2);
+   203→  const perpY = Math.sin(angle + Math.PI / 2);
+   204→
+   205→  // Sparse, skipping dots and dashes
+   206→  const dotCount = 18;
+   207→  for (let i = 0; i &lt; dotCount; i++) {
+   208→    if (pseudoRand(i, curr.timestamp) &lt; 0.35) continue; // skip for &quot;dry&quot; gaps
+   209→
+   210→    const t = lerp(0, 1, i / dotCount);
+   211→    const mx = lerp(prev.x, curr.x, t) * canvasWidth;
+   212→    const my = lerp(prev.y, curr.y, t) * canvasHeight;
+   213→    const spread = (pseudoRand(i, curr.x) - 0.5) * baseWidth;
+   214→
+   215→    ctx.beginPath();
+   216→    ctx.fillStyle = rgbStr(color, lerp(0.15, 0.45, pseudoRand(i + 3, curr.y)));
+   217→    const dotR = lerp(0.5, 2.5, pseudoRand(i + 7, curr.timestamp)) * (canvasWidth / 960);
+   218→    ctx.arc(
+   219→      mx + perpX * spread,
+   220→      my + perpY * spread,
+   221→      dotR,
+   222→      0, Math.PI * 2,
+   223→    );
+   224→    ctx.fill();
+   225→  }
+   226→};
+   227→
+   228→// --- Eraser tools ---
+   229→
+   230→const scraper: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+   231→  const { ctx, canvasWidth, canvasHeight } = rc;
+   232→  const width = lerp(20, 50, curr.pressure) * (canvasWidth / 960);
+   233→  const angle = strokeAngle(prev, curr);
+   234→  const perpX = Math.cos(angle + Math.PI / 2);
+   235→  const perpY = Math.sin(angle + Math.PI / 2);
+   236→  const hw = width / 2;
+   237→
+   238→  ctx.save();
+   239→  ctx.globalCompositeOperation = &#x27;destination-out&#x27;;
+   240→
+   241→  // Sharp quad that cuts paint away
+   242→  ctx.globalAlpha = lerp(0.85, 1.0, curr.pressure);
+   243→  ctx.beginPath();
+   244→  ctx.moveTo(prev.x * canvasWidth - perpX * hw, prev.y * canvasHeight - perpY * hw);
+   245→  ctx.lineTo(prev.x * canvasWidth + perpX * hw, prev.y * canvasHeight + perpY * hw);
+   246→  ctx.lineTo(curr.x * canvasWidth + perpX * hw, curr.y * canvasHeight + perpY * hw);
+   247→  ctx.lineTo(curr.x * canvasWidth - perpX * hw, curr.y * canvasHeight - perpY * hw);
+   248→  ctx.closePath();
+   249→  ctx.fill();</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-18-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-18-571Z" class="timestamp-link"><time datetime="2026-03-23T17:47:18.571Z" data-timestamp="2026-03-23T17:47:18.571Z">2026-03-23T17:47:18.571Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, I have the full picture. Let me implement all four items.</p>
+<p><strong>Item 2: Paint mixing</strong> — use <code>multiply</code> composite on the buffer for paint brushes so overlapping strokes darken.</p>
+<p><strong>Item 3: Canvas grain</strong> — render a one-time noise texture on a grain canvas, composite it under the paint.</p>
+<p><strong>Item 4: Stroke width velocity</strong> — compute speed from prev/curr points, scale brush width inversely.</p>
+<p><strong>Item 5: Keyboard shortcuts</strong> — listen for keydown on Space, Escape, Delete/Backspace.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-24-349Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-24-349Z" class="timestamp-link"><time datetime="2026-03-23T17:47:24.349Z" data-timestamp="2026-03-23T17:47:24.349Z">2026-03-23T17:47:24.349Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01296hw5gb6G4P55PNbyHRoq">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">function rgbStr(c: PaletteColor, alpha: number): string {
+  const [r, g, b] = c.rgb;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function strokeAngle(prev: StrokePoint, curr: StrokePoint): number {
+  return Math.atan2(curr.y - prev.y, curr.x - prev.x);
+}
+
+function strokeSpeed(prev: StrokePoint, curr: StrokePoint): number {
+  const dx = curr.x - prev.x;
+  const dy = curr.y - prev.y;
+  const dt = Math.max(curr.timestamp - prev.timestamp, 1);
+  return Math.sqrt(dx * dx + dy * dy) / dt;
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">function rgbStr(c: PaletteColor, alpha: number): string {
+  const [r, g, b] = c.rgb;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function strokeAngle(prev: StrokePoint, curr: StrokePoint): number {
+  return Math.atan2(curr.y - prev.y, curr.x - prev.x);
+}
+
+function strokeSpeed(prev: StrokePoint, curr: StrokePoint): number {
+  const dx = curr.x - prev.x;
+  const dy = curr.y - prev.y;
+  const dt = Math.max(curr.timestamp - prev.timestamp, 1);
+  return Math.sqrt(dx * dx + dy * dy) / dt;
+}
+
+// Velocity-based width multiplier: fast = thin, slow = thick
+function velocityWidthMul(prev: StrokePoint, curr: StrokePoint): number {
+  const speed = strokeSpeed(prev, curr);
+  return clamp(lerp(1.3, 0.4, speed * 600), 0.4, 1.3);
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-24-373Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-24-373Z" class="timestamp-link"><time datetime="2026-03-23T17:47:24.373Z" data-timestamp="2026-03-23T17:47:24.373Z">2026-03-23T17:47:24.373Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-28-023Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-28-023Z" class="timestamp-link"><time datetime="2026-03-23T17:47:28.023Z" data-timestamp="2026-03-23T17:47:28.023Z">2026-03-23T17:47:28.023Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now apply velocity width to each paint brush. Oil flat:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-29-901Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-29-901Z" class="timestamp-link"><time datetime="2026-03-23T17:47:29.901Z" data-timestamp="2026-03-23T17:47:29.901Z">2026-03-23T17:47:29.901Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01JY1XWi2YU8PGXC2oEcuVrJ">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const oilFlat: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const baseWidth = lerp(12, 30, curr.pressure) * (canvasWidth / 960);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const oilFlat: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const velMul = velocityWidthMul(prev, curr);
+  const baseWidth = lerp(12, 30, curr.pressure) * velMul * (canvasWidth / 960);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-29-920Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-29-920Z" class="timestamp-link"><time datetime="2026-03-23T17:47:29.920Z" data-timestamp="2026-03-23T17:47:29.920Z">2026-03-23T17:47:29.920Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-33-206Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-33-206Z" class="timestamp-link"><time datetime="2026-03-23T17:47:33.206Z" data-timestamp="2026-03-23T17:47:33.206Z">2026-03-23T17:47:33.206Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Oil round:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-35-105Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-35-105Z" class="timestamp-link"><time datetime="2026-03-23T17:47:35.105Z" data-timestamp="2026-03-23T17:47:35.105Z">2026-03-23T17:47:35.105Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FVatoa3zKRKAoRh59MFhCo">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const oilRound: BrushRenderer = (rc, _prev, curr, state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const scale = canvasWidth / 960;
+  const baseRadius = lerp(8, 22, curr.pressure) * scale;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const oilRound: BrushRenderer = (rc, prev, curr, state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const sc = canvasWidth / 960;
+  const velMul = velocityWidthMul(prev, curr);
+  const baseRadius = lerp(8, 22, curr.pressure) * velMul * sc;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-35-121Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-35-121Z" class="timestamp-link"><time datetime="2026-03-23T17:47:35.121Z" data-timestamp="2026-03-23T17:47:35.121Z">2026-03-23T17:47:35.121Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-39-212Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-39-212Z" class="timestamp-link"><time datetime="2026-03-23T17:47:39.212Z" data-timestamp="2026-03-23T17:47:39.212Z">2026-03-23T17:47:39.212Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Fix the <code>scale</code> reference that's now <code>sc</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-39-667Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-39-667Z" class="timestamp-link"><time datetime="2026-03-23T17:47:39.667Z" data-timestamp="2026-03-23T17:47:39.667Z">2026-03-23T17:47:39.667Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01A4cnpDrWdNCsrNa15xBrey"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts&#34;,
+  &#34;offset&#34;: 118,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-39-685Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-39-685Z" class="timestamp-link"><time datetime="2026-03-23T17:47:39.685Z" data-timestamp="2026-03-23T17:47:39.685Z">2026-03-23T17:47:39.685Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   118→  const cy = curr.y * canvasHeight;
+   119→
+   120→  // Paint load fades over the stroke — starts thick, gets translucent
+   121→  const loadFade = clamp(1.0 - state.segmentCount / 300, 0.25, 1.0);
+   122→
+   123→  for (const bristle of state.bristles) {
+   124→    const bx = cx + Math.cos(bristle.offsetAngle) * bristle.offsetRadius * baseRadius * splay;
+   125→    const by = cy + Math.sin(bristle.offsetAngle) * bristle.offsetRadius * baseRadius * splay;
+   126→
+   127→    const alpha = bristle.opacity * loadFade * lerp(0.5, 1.0, curr.pressure);
+   128→
+   129→    ctx.beginPath();
+   130→    ctx.strokeStyle = rgbStr(color, alpha);
+   131→    ctx.lineWidth = bristle.thickness * scale;
+   132→    ctx.lineCap = &#x27;round&#x27;;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-43-858Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-43-858Z" class="timestamp-link"><time datetime="2026-03-23T17:47:43.858Z" data-timestamp="2026-03-23T17:47:43.858Z">2026-03-23T17:47:43.858Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01LLAzyXuPwxyeksC4UoaG53">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    ctx.lineWidth = bristle.thickness * scale;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    ctx.lineWidth = bristle.thickness * sc;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-43-862Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-43-862Z" class="timestamp-link"><time datetime="2026-03-23T17:47:43.862Z" data-timestamp="2026-03-23T17:47:43.862Z">2026-03-23T17:47:43.862Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-47-633Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-47-633Z" class="timestamp-link"><time datetime="2026-03-23T17:47:47.633Z" data-timestamp="2026-03-23T17:47:47.633Z">2026-03-23T17:47:47.633Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Palette knife — already uses <code>strokeSpeed</code> for stretch, add velocity width:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-49-692Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-49-692Z" class="timestamp-link"><time datetime="2026-03-23T17:47:49.692Z" data-timestamp="2026-03-23T17:47:49.692Z">2026-03-23T17:47:49.692Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01JqsoNaimTJF4hENKR6oHhj">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const paletteKnife: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const speed = strokeSpeed(prev, curr);
+  const width = lerp(20, 50, curr.pressure) * (canvasWidth / 960);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const paletteKnife: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const speed = strokeSpeed(prev, curr);
+  const velMul = velocityWidthMul(prev, curr);
+  const width = lerp(20, 50, curr.pressure) * velMul * (canvasWidth / 960);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-49-717Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-49-717Z" class="timestamp-link"><time datetime="2026-03-23T17:47:49.717Z" data-timestamp="2026-03-23T17:47:49.717Z">2026-03-23T17:47:49.717Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-52-850Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-52-850Z" class="timestamp-link"><time datetime="2026-03-23T17:47:52.850Z" data-timestamp="2026-03-23T17:47:52.850Z">2026-03-23T17:47:52.850Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Dry brush:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-54-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-54-571Z" class="timestamp-link"><time datetime="2026-03-23T17:47:54.571Z" data-timestamp="2026-03-23T17:47:54.571Z">2026-03-23T17:47:54.571Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01TFyZNLEYGLWg9Q3f1PDLfy">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const dryBrush: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const baseWidth = lerp(10, 35, curr.pressure) * (canvasWidth / 960);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const dryBrush: BrushRenderer = (rc, prev, curr, _state) =&gt; {
+  const { ctx, color, canvasWidth, canvasHeight } = rc;
+  const velMul = velocityWidthMul(prev, curr);
+  const baseWidth = lerp(10, 35, curr.pressure) * velMul * (canvasWidth / 960);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-54-597Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-54-597Z" class="timestamp-link"><time datetime="2026-03-23T17:47:54.597Z" data-timestamp="2026-03-23T17:47:54.597Z">2026-03-23T17:47:54.597Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-58-721Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-58-721Z" class="timestamp-link"><time datetime="2026-03-23T17:47:58.721Z" data-timestamp="2026-03-23T17:47:58.721Z">2026-03-23T17:47:58.721Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now <strong>item 2: paint mixing</strong> — set <code>multiply</code> composite on the buffer before drawing paint strokes. I'll add this to <code>renderSegment</code> so it applies to paint brushes but not erasers (which need <code>destination-out</code>):</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-47-59-252Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-47-59-252Z" class="timestamp-link"><time datetime="2026-03-23T17:47:59.252Z" data-timestamp="2026-03-23T17:47:59.252Z">2026-03-23T17:47:59.252Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01DDDtxF77qppnkP9p9PZvrU"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts&#34;,
+  &#34;offset&#34;: 290,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-47-59-278Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-47-59-278Z" class="timestamp-link"><time datetime="2026-03-23T17:47:59.278Z" data-timestamp="2026-03-23T17:47:59.278Z">2026-03-23T17:47:59.278Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   290→
+   291→  // Soft dissolving dabs — multiple overlapping circles with low alpha
+   292→  // creates the fluid, pooling turpentine look
+   293→  const dabCount = 8;
+   294→  for (let i = 0; i &lt; dabCount; i++) {
+   295→    const angle = pseudoRand(i, curr.timestamp) * Math.PI * 2;
+   296→    const dist = pseudoRand(i + 5, curr.x) * radius * 0.6;
+   297→    const dabR = radius * lerp(0.3, 0.7, pseudoRand(i + 2, curr.y));
+   298→    const dabAlpha = lerp(0.15, 0.4, curr.pressure);
+   299→
+   300→    ctx.globalAlpha = dabAlpha;
+   301→    ctx.beginPath();
+   302→    ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, dabR, 0, Math.PI * 2);
+   303→    ctx.fill();
+   304→  }
+   305→
+   306→  // Central dissolve — stronger in the middle, like solvent pooling
+   307→  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+   308→  grad.addColorStop(0, &#x27;rgba(255,255,255,1)&#x27;);
+   309→  grad.addColorStop(1, &#x27;rgba(255,255,255,0)&#x27;);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-02-738Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-02-738Z" class="timestamp-link"><time datetime="2026-03-23T17:48:02.738Z" data-timestamp="2026-03-23T17:48:02.738Z">2026-03-23T17:48:02.738Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01VZXwT2FYzcasnWMAGcVGni"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts&#34;,
+  &#34;offset&#34;: 330,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-02-761Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-02-761Z" class="timestamp-link"><time datetime="2026-03-23T17:48:02.761Z" data-timestamp="2026-03-23T17:48:02.761Z">2026-03-23T17:48:02.761Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   330→  &#x27;oil-flat&#x27;: oilFlat,
+   331→  &#x27;oil-round&#x27;: oilRound,
+   332→  &#x27;palette-knife&#x27;: paletteKnife,
+   333→  &#x27;dry-brush&#x27;: dryBrush,
+   334→  &#x27;scraper&#x27;: scraper,
+   335→  &#x27;solvent&#x27;: solvent,
+   336→};
+   337→
+   338→export function renderSegment(
+   339→  brush: BrushType,
+   340→  rc: BrushRenderContext,
+   341→  prev: StrokePoint,
+   342→  curr: StrokePoint,
+   343→  state: BrushState,
+   344→): void {
+   345→  BRUSH_RENDERERS[brush](rc, prev, curr, state);
+   346→}
+   347→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-09-975Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-09-975Z" class="timestamp-link"><time datetime="2026-03-23T17:48:09.975Z" data-timestamp="2026-03-23T17:48:09.975Z">2026-03-23T17:48:09.975Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_018ehuGs9Hv7CK7wTWLk1dpi">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">brushes.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">export function renderSegment(
+  brush: BrushType,
+  rc: BrushRenderContext,
+  prev: StrokePoint,
+  curr: StrokePoint,
+  state: BrushState,
+): void {
+  BRUSH_RENDERERS[brush](rc, prev, curr, state);
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const ERASER_BRUSHES: ReadonlySet&lt;BrushType&gt; = new Set([&#39;scraper&#39;, &#39;solvent&#39;]);
+
+export function renderSegment(
+  brush: BrushType,
+  rc: BrushRenderContext,
+  prev: StrokePoint,
+  curr: StrokePoint,
+  state: BrushState,
+): void {
+  const { ctx } = rc;
+  // Paint brushes use multiply so overlapping strokes darken like pigment
+  if (!ERASER_BRUSHES.has(brush)) {
+    ctx.save();
+    ctx.globalCompositeOperation = &#39;multiply&#39;;
+    BRUSH_RENDERERS[brush](rc, prev, curr, state);
+    ctx.restore();
+  } else {
+    BRUSH_RENDERERS[brush](rc, prev, curr, state);
+  }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-09-990Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-09-990Z" class="timestamp-link"><time datetime="2026-03-23T17:48:09.990Z" data-timestamp="2026-03-23T17:48:09.990Z">2026-03-23T17:48:09.990Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/brushes.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-14-529Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-14-529Z" class="timestamp-link"><time datetime="2026-03-23T17:48:14.529Z" data-timestamp="2026-03-23T17:48:14.529Z">2026-03-23T17:48:14.529Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now <strong>item 3: canvas grain texture</strong>. I'll add it to the renderer — generate a noise pattern once and composite it as the background:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-20-029Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-20-029Z" class="timestamp-link"><time datetime="2026-03-23T17:48:20.029Z" data-timestamp="2026-03-23T17:48:20.029Z">2026-03-23T17:48:20.029Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_0112Mn3Xj27nfYLyp68dEnF6">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">renderer.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/renderer.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
+  const ctx = canvas.getContext(&#39;2d&#39;)!;
+  const bufferCanvas = document.createElement(&#39;canvas&#39;);
+  const bufferCtx = bufferCanvas.getContext(&#39;2d&#39;)!;
+
+  let playheadX: number | null = null;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">function createGrainPattern(w: number, h: number): HTMLCanvasElement {
+  const grain = document.createElement(&#39;canvas&#39;);
+  grain.width = w;
+  grain.height = h;
+  const gCtx = grain.getContext(&#39;2d&#39;)!;
+  const imgData = gCtx.createImageData(w, h);
+  const d = imgData.data;
+  for (let i = 0; i &lt; d.length; i += 4) {
+    const v = 245 + Math.random() * 10; // very subtle: 245-255 range
+    d[i] = v;
+    d[i + 1] = v;
+    d[i + 2] = v;
+    d[i + 3] = 30; // low alpha — just a hint of texture
+  }
+  gCtx.putImageData(imgData, 0, 0);
+  return grain;
+}
+
+export function createRenderer(canvas: HTMLCanvasElement): CanvasRenderer {
+  const ctx = canvas.getContext(&#39;2d&#39;)!;
+  const bufferCanvas = document.createElement(&#39;canvas&#39;);
+  const bufferCtx = bufferCanvas.getContext(&#39;2d&#39;)!;
+
+  let playheadX: number | null = null;
+  let grainCanvas: HTMLCanvasElement | null = null;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-20-055Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-20-055Z" class="timestamp-link"><time datetime="2026-03-23T17:48:20.055Z" data-timestamp="2026-03-23T17:48:20.055Z">2026-03-23T17:48:20.055Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/renderer.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-24-153Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-24-153Z" class="timestamp-link"><time datetime="2026-03-23T17:48:24.153Z" data-timestamp="2026-03-23T17:48:24.153Z">2026-03-23T17:48:24.153Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now regenerate the grain when the canvas resizes and draw it in the composite frame:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-26-392Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-26-392Z" class="timestamp-link"><time datetime="2026-03-23T17:48:26.392Z" data-timestamp="2026-03-23T17:48:26.392Z">2026-03-23T17:48:26.392Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_012kJzLQ2W9h5xw8mzphRBix">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">renderer.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/renderer.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">      // Restore buffer contents scaled to new size
+      if (tmpCanvas.width &gt; 0 &amp;&amp; tmpCanvas.height &gt; 0) {
+        bufferCtx.drawImage(tmpCanvas, 0, 0, w, h);
+      }
+    }
+  }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">      // Restore buffer contents scaled to new size
+      if (tmpCanvas.width &gt; 0 &amp;&amp; tmpCanvas.height &gt; 0) {
+        bufferCtx.drawImage(tmpCanvas, 0, 0, w, h);
+      }
+
+      grainCanvas = createGrainPattern(w, h);
+    }
+  }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-26-417Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-26-417Z" class="timestamp-link"><time datetime="2026-03-23T17:48:26.417Z" data-timestamp="2026-03-23T17:48:26.417Z">2026-03-23T17:48:26.417Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/renderer.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-32-250Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-32-250Z" class="timestamp-link"><time datetime="2026-03-23T17:48:32.250Z" data-timestamp="2026-03-23T17:48:32.250Z">2026-03-23T17:48:32.250Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01VDFVN2xAbNLw7ezUNP3aUs">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">renderer.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/canvas/renderer.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  function compositeFrame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bufferCanvas, 0, 0);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  function compositeFrame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw canvas grain texture under the paint
+    if (grainCanvas) {
+      ctx.drawImage(grainCanvas, 0, 0);
+    }
+
+    ctx.drawImage(bufferCanvas, 0, 0);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-32-281Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-32-281Z" class="timestamp-link"><time datetime="2026-03-23T17:48:32.281Z" data-timestamp="2026-03-23T17:48:32.281Z">2026-03-23T17:48:32.281Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/canvas/renderer.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-35-745Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-35-745Z" class="timestamp-link"><time datetime="2026-03-23T17:48:35.745Z" data-timestamp="2026-03-23T17:48:35.745Z">2026-03-23T17:48:35.745Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now <strong>item 5: keyboard shortcuts</strong>. I'll add these in main.ts:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-36-688Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-36-688Z" class="timestamp-link"><time datetime="2026-03-23T17:48:36.688Z" data-timestamp="2026-03-23T17:48:36.688Z">2026-03-23T17:48:36.688Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01NmLBfbEecyieHdPiQRw9UX"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/main.ts&#34;,
+  &#34;offset&#34;: 108,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-36-716Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-36-716Z" class="timestamp-link"><time datetime="2026-03-23T17:48:36.716Z" data-timestamp="2026-03-23T17:48:36.716Z">2026-03-23T17:48:36.716Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   108→
+   109→window.addEventListener(&#x27;resize&#x27;, () =&gt; renderer.resize());
+   110→
+   111→initDebugPanel((v) =&gt; {
+   112→  getMasterOutput().gain.value = v;
+   113→});
+   114→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-42-054Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-42-054Z" class="timestamp-link"><time datetime="2026-03-23T17:48:42.054Z" data-timestamp="2026-03-23T17:48:42.054Z">2026-03-23T17:48:42.054Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I need to also export a way to programmatically switch modes from main.ts. Let me look at how the controls expose mode switching:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-42-471Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-42-471Z" class="timestamp-link"><time datetime="2026-03-23T17:48:42.471Z" data-timestamp="2026-03-23T17:48:42.471Z">2026-03-23T17:48:42.471Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01AH3SBz4VGBVJ6CTGDtqNeh"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/controls.ts&#34;,
+  &#34;offset&#34;: 160,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-42-495Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-42-495Z" class="timestamp-link"><time datetime="2026-03-23T17:48:42.495Z" data-timestamp="2026-03-23T17:48:42.495Z">2026-03-23T17:48:42.495Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   160→    });
+   161→
+   162→    brushContainer.appendChild(btn);
+   163→  });
+   164→
+   165→  // Mode toggle
+   166→  const liveBtn = document.getElementById(&#x27;btn-live&#x27;)!;
+   167→  const playheadBtn = document.getElementById(&#x27;btn-playhead&#x27;)!;
+   168→
+   169→  function setMode(mode: AudioMode) {
+   170→    state.audioMode = mode;
+   171→    liveBtn.classList.toggle(&#x27;active&#x27;, mode === &#x27;live&#x27;);
+   172→    playheadBtn.classList.toggle(&#x27;active&#x27;, mode === &#x27;playhead&#x27;);
+   173→    callbacks.onModeChange(mode);
+   174→  }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-46-898Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-46-898Z" class="timestamp-link"><time datetime="2026-03-23T17:48:46.898Z" data-timestamp="2026-03-23T17:48:46.898Z">2026-03-23T17:48:46.898Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I need <code>initControls</code> to return the <code>setMode</code> function so keyboard shortcuts can call it. Let me update the return type:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-47-664Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-47-664Z" class="timestamp-link"><time datetime="2026-03-23T17:48:47.664Z" data-timestamp="2026-03-23T17:48:47.664Z">2026-03-23T17:48:47.664Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017JH43jBJuSc1pZ6DYZJzeK"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/controls.ts&#34;,
+  &#34;offset&#34;: 175,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-47-704Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-47-704Z" class="timestamp-link"><time datetime="2026-03-23T17:48:47.704Z" data-timestamp="2026-03-23T17:48:47.704Z">2026-03-23T17:48:47.704Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   175→
+   176→  liveBtn.addEventListener(&#x27;click&#x27;, () =&gt; setMode(&#x27;live&#x27;));
+   177→  playheadBtn.addEventListener(&#x27;click&#x27;, () =&gt; setMode(&#x27;playhead&#x27;));
+   178→
+   179→  document.getElementById(&#x27;btn-clear&#x27;)!.addEventListener(&#x27;click&#x27;, () =&gt; {
+   180→    callbacks.onClear();
+   181→    setMode(&#x27;live&#x27;);
+   182→  });
+   183→
+   184→  return state;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-51-493Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-51-493Z" class="timestamp-link"><time datetime="2026-03-23T17:48:51.493Z" data-timestamp="2026-03-23T17:48:51.493Z">2026-03-23T17:48:51.493Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01BuaMZB77Hcbnf8zFpZY78i">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">controls.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/ui/controls.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  return state;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  return { state, setMode };</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-51-532Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-51-532Z" class="timestamp-link"><time datetime="2026-03-23T17:48:51.532Z" data-timestamp="2026-03-23T17:48:51.532Z">2026-03-23T17:48:51.532Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/ui/controls.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-55-159Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-55-159Z" class="timestamp-link"><time datetime="2026-03-23T17:48:55.159Z" data-timestamp="2026-03-23T17:48:55.159Z">2026-03-23T17:48:55.159Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update main.ts to destructure and add keyboard shortcuts:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-48-55-421Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-48-55-421Z" class="timestamp-link"><time datetime="2026-03-23T17:48:55.421Z" data-timestamp="2026-03-23T17:48:55.421Z">2026-03-23T17:48:55.421Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JKjbmHfnyL1ohbgkTHBKiz"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/main.ts&#34;,
+  &#34;offset&#34;: 38,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-48-55-454Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-48-55-454Z" class="timestamp-link"><time datetime="2026-03-23T17:48:55.454Z" data-timestamp="2026-03-23T17:48:55.454Z">2026-03-23T17:48:55.454Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    38→  (x) =&gt; renderer.setPlayheadPosition(x &gt;= 0 ? x : null),
+    39→);
+    40→
+    41→const controls = initControls({
+    42→  onModeChange(mode: AudioMode) {
+    43→    if (mode === &#x27;playhead&#x27;) {
+    44→      playhead.start();
+    45→    } else {
+    46→      playhead.stop();
+    47→    }
+    48→  },
+    49→  onClear() {
+    50→    playhead.stop();
+    51→    painting = { ...painting, strokes: [] };
+    52→    activeStrokes.clear();</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-00-344Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-00-344Z" class="timestamp-link"><time datetime="2026-03-23T17:49:00.344Z" data-timestamp="2026-03-23T17:49:00.344Z">2026-03-23T17:49:00.344Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_012u5coKqenPGXDW2yAT5Nna">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/main.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">const controls = initControls({
+  onModeChange(mode: AudioMode) {
+    if (mode === &#39;playhead&#39;) {
+      playhead.start();
+    } else {
+      playhead.stop();
+    }
+  },
+  onClear() {
+    playhead.stop();
+    painting = { ...painting, strokes: [] };
+    activeStrokes.clear();</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">const { state: controls, setMode } = initControls({
+  onModeChange(mode: AudioMode) {
+    if (mode === &#39;playhead&#39;) {
+      playhead.start();
+    } else {
+      playhead.stop();
+    }
+  },
+  onClear() {
+    playhead.stop();
+    painting = { ...painting, strokes: [] };
+    activeStrokes.clear();</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-00-348Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-00-348Z" class="timestamp-link"><time datetime="2026-03-23T17:49:00.348Z" data-timestamp="2026-03-23T17:49:00.348Z">2026-03-23T17:49:00.348Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/main.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-03-660Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-03-660Z" class="timestamp-link"><time datetime="2026-03-23T17:49:03.660Z" data-timestamp="2026-03-23T17:49:03.660Z">2026-03-23T17:49:03.660Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add keyboard shortcuts at the end:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-07-005Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-07-005Z" class="timestamp-link"><time datetime="2026-03-23T17:49:07.005Z" data-timestamp="2026-03-23T17:49:07.005Z">2026-03-23T17:49:07.005Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01F38yvLtCNWBcAJE6PGcfzL">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/main.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">initDebugPanel((v) =&gt; {
+  getMasterOutput().gain.value = v;
+});</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">initDebugPanel((v) =&gt; {
+  getMasterOutput().gain.value = v;
+});
+
+// Keyboard shortcuts
+window.addEventListener(&#39;keydown&#39;, (e) =&gt; {
+  // Ignore when typing in an input
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+  switch (e.code) {
+    case &#39;Space&#39;:
+      e.preventDefault();
+      setMode(controls.audioMode === &#39;live&#39; ? &#39;playhead&#39; : &#39;live&#39;);
+      break;
+    case &#39;Escape&#39;:
+      setMode(&#39;live&#39;);
+      break;
+    case &#39;Delete&#39;:
+    case &#39;Backspace&#39;:
+      e.preventDefault();
+      playhead.stop();
+      painting = { ...painting, strokes: [] };
+      activeStrokes.clear();
+      renderer.clear();
+      setMode(&#39;live&#39;);
+      break;
+  }
+});</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-07-033Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-07-033Z" class="timestamp-link"><time datetime="2026-03-23T17:49:07.033Z" data-timestamp="2026-03-23T17:49:07.033Z">2026-03-23T17:49:07.033Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/main.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-10-652Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-10-652Z" class="timestamp-link"><time datetime="2026-03-23T17:49:10.652Z" data-timestamp="2026-03-23T17:49:10.652Z">2026-03-23T17:49:10.652Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01LzR6R8tuaTYq3k6grFj9KJ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-13-209Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-13-209Z" class="timestamp-link"><time datetime="2026-03-23T17:49:13.209Z" data-timestamp="2026-03-23T17:49:13.209Z">2026-03-23T17:49:13.209Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>Exit code 2
+src/main.ts(41,9): error TS2339: Property &#x27;state&#x27; does not exist on type &#x27;ControlState&#x27;.
+src/main.ts(41,26): error TS2339: Property &#x27;setMode&#x27; does not exist on type &#x27;ControlState&#x27;.
+src/ui/controls.ts(184,12): error TS2353: Object literal may only specify known properties, and &#x27;state&#x27; does not exist in type &#x27;ControlState&#x27;.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-17-418Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-17-418Z" class="timestamp-link"><time datetime="2026-03-23T17:49:17.418Z" data-timestamp="2026-03-23T17:49:17.418Z">2026-03-23T17:49:17.418Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Need to update the return type of <code>initControls</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-18-069Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-18-069Z" class="timestamp-link"><time datetime="2026-03-23T17:49:18.069Z" data-timestamp="2026-03-23T17:49:18.069Z">2026-03-23T17:49:18.069Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CTbkTw7EtsfuxEawSGX3p8"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/controls.ts&#34;,
+  &#34;offset&#34;: 32,
+  &#34;limit&#34;: 3
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-18-097Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-18-097Z" class="timestamp-link"><time datetime="2026-03-23T17:49:18.097Z" data-timestamp="2026-03-23T17:49:18.097Z">2026-03-23T17:49:18.097Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    32→  return brush === &#x27;scraper&#x27; || brush === &#x27;solvent&#x27;;
+    33→}
+    34→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-21-643Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-21-643Z" class="timestamp-link"><time datetime="2026-03-23T17:49:21.643Z" data-timestamp="2026-03-23T17:49:21.643Z">2026-03-23T17:49:21.643Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_013xiAYVmeoxngGjzKkHztLt"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/controls.ts&#34;,
+  &#34;offset&#34;: 34,
+  &#34;limit&#34;: 3
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-21-659Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-21-659Z" class="timestamp-link"><time datetime="2026-03-23T17:49:21.659Z" data-timestamp="2026-03-23T17:49:21.659Z">2026-03-23T17:49:21.659Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>    34→
+    35→export function initControls(callbacks: ControlCallbacks): ControlState {
+    36→  const palette = createPalette();</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-27-512Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-27-512Z" class="timestamp-link"><time datetime="2026-03-23T17:49:27.512Z" data-timestamp="2026-03-23T17:49:27.512Z">2026-03-23T17:49:27.512Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_0146GyQskDdFuHVLwZMnhvzu">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">controls.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/ui/controls.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">export function initControls(callbacks: ControlCallbacks): ControlState {</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">export function initControls(callbacks: ControlCallbacks): { state: ControlState; setMode: (mode: AudioMode) =&gt; void } {</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-27-535Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-27-535Z" class="timestamp-link"><time datetime="2026-03-23T17:49:27.535Z" data-timestamp="2026-03-23T17:49:27.535Z">2026-03-23T17:49:27.535Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/ui/controls.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-30-880Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-30-880Z" class="timestamp-link"><time datetime="2026-03-23T17:49:30.880Z" data-timestamp="2026-03-23T17:49:30.880Z">2026-03-23T17:49:30.880Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01ETZdxR9BXJSDqTFpqptYr8">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-49-34-624Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-49-34-624Z" class="timestamp-link"><time datetime="2026-03-23T17:49:34.624Z" data-timestamp="2026-03-23T17:49:34.624Z">2026-03-23T17:49:34.624Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-49-38-096Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-49-38-096Z" class="timestamp-link"><time datetime="2026-03-23T17:49:38.096Z" data-timestamp="2026-03-23T17:49:38.096Z">2026-03-23T17:49:38.096Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01E7bNPUJnB8isCnZcULvM4X">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npm run build 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-50-14-798Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-50-14-798Z" class="timestamp-link"><time datetime="2026-03-23T17:50:14.798Z" data-timestamp="2026-03-23T17:50:14.798Z">2026-03-23T17:50:14.798Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>ok (no errors)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-50-21-846Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-50-21-846Z" class="timestamp-link"><time datetime="2026-03-23T17:50:21.846Z" data-timestamp="2026-03-23T17:50:21.846Z">2026-03-23T17:50:21.846Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All four items done:</p>
+<ol>
+<li><strong>Paint mixing</strong> — overlapping paint strokes now use <code>multiply</code> compositing, so they darken at intersections like real pigment mixing</li>
+<li><strong>Canvas grain</strong> — subtle noise texture on the white background simulating canvas/paper grain (alpha 30, barely visible but adds physicality)</li>
+<li><strong>Stroke width velocity</strong> — fast strokes are thinner (0.4x), slow strokes are thicker (1.3x), all four paint brushes</li>
+<li><strong>Keyboard shortcuts</strong> — Space toggles Live/Playhead, Escape goes to Live, Delete/Backspace clears</li>
+</ol>
+<p>Try it out.</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T17-54-52-750Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T17-54-52-750Z" class="timestamp-link"><time datetime="2026-03-23T17:54:52.750Z" data-timestamp="2026-03-23T17:54:52.750Z">2026-03-23T17:54:52.750Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Let's commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-54-57-087Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-54-57-087Z" class="timestamp-link"><time datetime="2026-03-23T17:54:57.087Z" data-timestamp="2026-03-23T17:54:57.087Z">2026-03-23T17:54:57.087Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Kaa3BJ4a2mNSy2U9zZmQpY">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show working tree status</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git status</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-54-57-162Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-54-57-162Z" class="timestamp-link"><time datetime="2026-03-23T17:54:57.162Z" data-timestamp="2026-03-23T17:54:57.162Z">2026-03-23T17:54:57.162Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>On branch stage-5-polish
+Changes not staged for commit:
+	modified:   src/canvas/brushes.ts
+	modified:   src/canvas/renderer.ts
+	modified:   src/main.ts
+	modified:   src/ui/controls.ts
+
+Untracked files:
+	.claude/
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-54-57-282Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-54-57-282Z" class="timestamp-link"><time datetime="2026-03-23T17:54:57.282Z" data-timestamp="2026-03-23T17:54:57.282Z">2026-03-23T17:54:57.282Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RixRrLo5yVS8i44xdhzK6m">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show recent commits</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git log --oneline -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-54-57-311Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-54-57-311Z" class="timestamp-link"><time datetime="2026-03-23T17:54:57.311Z" data-timestamp="2026-03-23T17:54:57.311Z">2026-03-23T17:54:57.311Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>0d98518 Stage 4: Playhead loop, Live/Playhead toggle, debug panel
+96605b8 Combine Play/Stop into a single toggle button
+37fe901 Stage 3: Audio engine with HSL-derived voice synthesis</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-55-04-021Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-55-04-021Z" class="timestamp-link"><time datetime="2026-03-23T17:55:04.021Z" data-timestamp="2026-03-23T17:55:04.021Z">2026-03-23T17:55:04.021Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FRRUHbTb5ofhikwTuS2B9N">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit stage 5 polish</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add src/canvas/brushes.ts src/canvas/renderer.ts src/main.ts src/ui/controls.ts &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Stage 5: Paint mixing, canvas grain, velocity width, keyboard shortcuts
+
+Overlapping paint strokes use multiply compositing for pigment-like
+darkening. Subtle noise grain texture on canvas background. Stroke
+width varies with velocity — fast strokes thin, slow strokes thick.
+Keyboard shortcuts: Space toggles Live/Playhead, Escape returns to
+Live, Delete/Backspace clears canvas.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-55-19-725Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-55-19-725Z" class="timestamp-link"><time datetime="2026-03-23T17:55:19.725Z" data-timestamp="2026-03-23T17:55:19.725Z">2026-03-23T17:55:19.725Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">33168de</span> Stage 5: Paint mixing, canvas grain, velocity width, keyboard shortcuts</div><pre>4 files changed, 84 insertions(+), 11 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-55-23-125Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-55-23-125Z" class="timestamp-link"><time datetime="2026-03-23T17:55:23.125Z" data-timestamp="2026-03-23T17:55:23.125Z">2026-03-23T17:55:23.125Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RAVrtywnmsQVnpRsMcXzH8"><div class="tool-header"><span class="tool-icon">⚙</span> TaskUpdate</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;taskId&#34;: &#34;5&#34;,
+  &#34;status&#34;: &#34;completed&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-55-23-153Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-55-23-153Z" class="timestamp-link"><time datetime="2026-03-23T17:55:23.153Z" data-timestamp="2026-03-23T17:55:23.153Z">2026-03-23T17:55:23.153Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Updated task #5 status</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-55-27-116Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-55-27-116Z" class="timestamp-link"><time datetime="2026-03-23T17:55:27.116Z" data-timestamp="2026-03-23T17:55:27.116Z">2026-03-23T17:55:27.116Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Committed. Want to revisit item 1 (smooth parameter interpolation) now, or move on to Stage 6 (sharing)?</p></div></div></div>
+<div class="message user" id="msg-2026-03-23T17-56-14-385Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T17-56-14-385Z" class="timestamp-link"><time datetime="2026-03-23T17:56:14.385Z" data-timestamp="2026-03-23T17:56:14.385Z">2026-03-23T17:56:14.385Z</time></a></div><div class="message-content">
+<div class="user-content"><p>The playhead is still a bit too noisy. One alternative is to instead have "play back", which essentially replays all of the strokes in sequence that they were added...</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-56-23-340Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-56-23-340Z" class="timestamp-link"><time datetime="2026-03-23T17:56:23.340Z" data-timestamp="2026-03-23T17:56:23.340Z">2026-03-23T17:56:23.340Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-56-25-114Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-56-25-114Z" class="timestamp-link"><time datetime="2026-03-23T17:56:25.114Z" data-timestamp="2026-03-23T17:56:25.114Z">2026-03-23T17:56:25.114Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That's a really interesting idea — replay the painting process itself. The strokes already have timestamps on every point, so we have the full timing data. It would essentially re-perform the live audition in sequence, which would sound much more intentional than the column scanner hitting everything at once.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-56-32-634Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-56-32-634Z" class="timestamp-link"><time datetime="2026-03-23T17:56:32.634Z" data-timestamp="2026-03-23T17:56:32.634Z">2026-03-23T17:56:32.634Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_013TSNCfegdifp3sRq2tXwoK"><div class="tool-header"><span class="tool-icon">⚙</span> AskUserQuestion</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;questions&#34;: [
+    {
+      &#34;question&#34;: &#34;Should stroke replay replace the playhead scanner, or be a third mode alongside Live and Playhead?&#34;,
+      &#34;header&#34;: &#34;Replay mode&#34;,
+      &#34;options&#34;: [
+        {
+          &#34;label&#34;: &#34;Replace the scanner&#34;,
+          &#34;description&#34;: &#34;Remove the column-scanning playhead entirely. The toggle becomes Live | Replay. Simpler, and the scanner is the noisy part anyway.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Third mode&#34;,
+          &#34;description&#34;: &#34;Keep all three: Live (paint with sound), Playhead (column scanner), Replay (stroke-by-stroke). More options but more complex UI.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Replace, but keep scanner code&#34;,
+          &#34;description&#34;: &#34;Ship with Live | Replay only, but leave the scanner code in place so it could be re-enabled later via debug panel or config.&#34;
+        }
+      ],
+      &#34;multiSelect&#34;: false
+    },
+    {
+      &#34;question&#34;: &#34;Should the replay also visually redraw the strokes, or just play the sound?&#34;,
+      &#34;header&#34;: &#34;Visual replay&#34;,
+      &#34;options&#34;: [
+        {
+          &#34;label&#34;: &#34;Sound only&#34;,
+          &#34;description&#34;: &#34;Canvas stays as-is showing the finished painting. Sound replays the stroke sequence. Simpler.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Full visual replay&#34;,
+          &#34;description&#34;: &#34;Canvas clears and strokes are redrawn in real-time as they play back. Like watching someone paint. More dramatic but means the painting disappears and reappears each loop.&#34;
+        }
+      ],
+      &#34;multiSelect&#34;: false
+    }
+  ]
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-56-53-480Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-56-53-480Z" class="timestamp-link"><time datetime="2026-03-23T17:56:53.480Z" data-timestamp="2026-03-23T17:56:53.480Z">2026-03-23T17:56:53.480Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>User has answered your questions: &quot;Should stroke replay replace the playhead scanner, or be a third mode alongside Live and Playhead?&quot;=&quot;Replace the scanner&quot;, &quot;Should the replay also visually redraw the strokes, or just play the sound?&quot;=&quot;Sound only&quot;. You can now continue with the user&#x27;s answers in mind.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-56-58-942Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-56-58-942Z" class="timestamp-link"><time datetime="2026-03-23T17:56:58.942Z" data-timestamp="2026-03-23T17:56:58.942Z">2026-03-23T17:56:58.942Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Clean — replace the scanner with stroke replay, sound only. The toggle becomes <strong>Live | Replay</strong>.</p>
+<p>Let me build it. The replay will:
+- Sort strokes by their first point timestamp
+- Schedule voice events following each stroke's point sequence
+- Loop after the last stroke ends (or after the loop duration, whichever is longer)</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-56-59-241Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-56-59-241Z" class="timestamp-link"><time datetime="2026-03-23T17:56:59.241Z" data-timestamp="2026-03-23T17:56:59.241Z">2026-03-23T17:56:59.241Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01QGWJaknnPERVwh5koYMzcQ"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/playhead.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-56-59-265Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-56-59-265Z" class="timestamp-link"><time datetime="2026-03-23T17:56:59.265Z" data-timestamp="2026-03-23T17:56:59.265Z">2026-03-23T17:56:59.265Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { BrushType, EraserTool, PaletteColor, Painting, StrokePoint } from &#x27;../types&#x27;;
+     2→import { getAudioContext, ensureResumed } from &#x27;./engine&#x27;;
+     3→import { createVoice, type Voice } from &#x27;./voices&#x27;;
+     4→import { voiceParamsFromColor, positionMod } from &#x27;./mappings&#x27;;
+     5→import { getEffectChain } from &#x27;./effects&#x27;;
+     6→import { debugParams } from &#x27;../ui/debug&#x27;;
+     7→
+     8→const COLUMNS = 128;
+     9→const LOOKAHEAD_MS = 50;
+    10→const SCHEDULE_INTERVAL_MS = 25;
+    11→
+    12→const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#x27;scraper&#x27;, &#x27;solvent&#x27;]);
+    13→
+    14→export type Playhead = {
+    15→  start: () =&gt; void;
+    16→  stop: () =&gt; void;
+    17→  isPlaying: () =&gt; boolean;
+    18→  getPosition: () =&gt; number; // 0..1 normalized X position
+    19→};
+    20→
+    21→type ActivePlayheadVoice = {
+    22→  voice: Voice;
+    23→  startedAtCol: number;
+    24→};
+    25→
+    26→export function createPlayhead(
+    27→  getPainting: () =&gt; Painting,
+    28→  onPositionChange: (x: number) =&gt; void,
+    29→): Playhead {
+    30→  let playing = false;
+    31→  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+    32→  let animFrameId = 0;
+    33→  let loopStartTime = 0; // AudioContext time when loop started
+    34→  let lastScheduledCol = -1;
+    35→  const activeVoices: ActivePlayheadVoice[] = [];
+    36→
+    37→  function getLoopDuration(): number {
+    38→    return getPainting().loopLengthMs / 1000; // seconds
+    39→  }
+    40→
+    41→  function getColumnDuration(): number {
+    42→    return getLoopDuration() / COLUMNS;
+    43→  }
+    44→
+    45→  // Find strokes that pass through a given column (normalized X range)
+    46→  function strokesAtColumn(col: number): { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] {
+    47→    const painting = getPainting();
+    48→    const colStart = col / COLUMNS;
+    49→    const colEnd = (col + 1) / COLUMNS;
+    50→    const results: { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] = [];
+    51→
+    52→    for (const stroke of painting.strokes) {
+    53→      if (ERASERS.has(stroke.brush)) continue;
+    54→
+    55→      // Find points within this column&#x27;s X range
+    56→      const pointsInCol: StrokePoint[] = [];
+    57→      for (const pt of stroke.points) {
+    58→        if (pt.x &gt;= colStart &amp;&amp; pt.x &lt; colEnd) {
+    59→          pointsInCol.push(pt);
+    60→        }
+    61→      }
+    62→      // Also check segments that cross through this column
+    63→      for (let i = 1; i &lt; stroke.points.length; i++) {
+    64→        const a = stroke.points[i - 1];
+    65→        const b = stroke.points[i];
+    66→        if ((a.x &lt; colStart &amp;&amp; b.x &gt;= colStart) || (a.x &gt;= colEnd &amp;&amp; b.x &lt; colEnd)) {
+    67→          // Interpolate a point at the column boundary
+    68→          const t = (colStart - a.x) / (b.x - a.x);
+    69→          if (t &gt;= 0 &amp;&amp; t &lt;= 1) {
+    70→            pointsInCol.push({
+    71→              x: colStart,
+    72→              y: a.y + (b.y - a.y) * t,
+    73→              pressure: a.pressure + (b.pressure - a.pressure) * t,
+    74→              timestamp: a.timestamp + (b.timestamp - a.timestamp) * t,
+    75→            });
+    76→          }
+    77→        }
+    78→      }
+    79→
+    80→      if (pointsInCol.length === 0) continue;
+    81→
+    82→      // Average the points for this stroke in this column
+    83→      let sumX = 0, sumY = 0, sumP = 0;
+    84→      for (const p of pointsInCol) {
+    85→        sumX += p.x;
+    86→        sumY += p.y;
+    87→        sumP += p.pressure;
+    88→      }
+    89→      const n = pointsInCol.length;
+    90→      results.push({
+    91→        color: stroke.color,
+    92→        brush: stroke.brush,
+    93→        avgPoint: {
+    94→          x: sumX / n,
+    95→          y: sumY / n,
+    96→          pressure: sumP / n,
+    97→          timestamp: 0,
+    98→        },
+    99→      });
+   100→    }
+   101→
+   102→    return results;
+   103→  }
+   104→
+   105→  function triggerColumn(col: number, when: number) {
+   106→    const colDur = getColumnDuration();
+   107→    const hits = strokesAtColumn(col);
+   108→
+   109→    // Scale gain down when many strokes hit the same column
+   110→    const density = hits.length;
+   111→    const gainScale = density &lt;= 1 ? 1.0 : 1.0 / Math.sqrt(density);
+   112→
+   113→    for (const hit of hits) {
+   114→      // Voice stealing: remove oldest if at limit
+   115→      while (activeVoices.length &gt;= debugParams.maxVoices) {
+   116→        const oldest = activeVoices.shift()!;
+   117→        oldest.voice.stop();
+   118→      }
+   119→
+   120→      const params = voiceParamsFromColor(hit.color);
+   121→      const mod = positionMod(hit.avgPoint);
+   122→      const voice = createVoice(params, mod, hit.avgPoint.pressure, gainScale);
+   123→      const chain = getEffectChain(hit.brush);
+   124→      voice.output.connect(chain.input);
+   125→
+   126→      // Schedule stop — overlap controlled by debug slider
+   127→      voice.stop(when + colDur * debugParams.voiceOverlap);
+   128→
+   129→      activeVoices.push({ voice, startedAtCol: col });
+   130→    }
+   131→
+   132→    // Clean up voices that have finished
+   133→    const now = getAudioContext().currentTime;
+   134→    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+   135→      const age = (now - when) + (col - activeVoices[i].startedAtCol) * colDur;
+   136→      if (age &gt; colDur * 2) {
+   137→        activeVoices.splice(i, 1);
+   138→      }
+   139→    }
+   140→  }
+   141→
+   142→  function schedule() {
+   143→    const ctx = getAudioContext();
+   144→    const now = ctx.currentTime;
+   145→    const loopDur = getLoopDuration();
+   146→    const colDur = getColumnDuration();
+   147→    const lookaheadSec = LOOKAHEAD_MS / 1000;
+   148→
+   149→    // How far into the loop are we?
+   150→    const elapsed = now - loopStartTime;
+   151→
+   152→    // Schedule columns up to the lookahead window
+   153→    const endTime = now + lookaheadSec;
+   154→    let col = lastScheduledCol + 1;
+   155→    if (col &gt;= COLUMNS) col = 0;
+   156→
+   157→    while (true) {
+   158→      // Time when this column should play
+   159→      const colLoopTime = (col / COLUMNS) * loopDur;
+   160→      // Which loop iteration are we in?
+   161→      const loopIteration = Math.floor(elapsed / loopDur);
+   162→      let colAbsTime = loopStartTime + loopIteration * loopDur + colLoopTime;
+   163→
+   164→      // If this column&#x27;s time has already passed in this iteration, it&#x27;s in the next one
+   165→      if (colAbsTime &lt; now - colDur) {
+   166→        colAbsTime += loopDur;
+   167→      }
+   168→
+   169→      if (colAbsTime &gt; endTime) break;
+   170→      if (colAbsTime &gt;= now - 0.01) {
+   171→        triggerColumn(col, colAbsTime);
+   172→        lastScheduledCol = col;
+   173→      }
+   174→
+   175→      col = (col + 1) % COLUMNS;
+   176→      // Safety: don&#x27;t schedule more than COLUMNS in one pass
+   177→      if (col === (lastScheduledCol + 1) % COLUMNS) break;
+   178→    }
+   179→  }
+   180→
+   181→  function updateVisual() {
+   182→    if (!playing) return;
+   183→    const ctx = getAudioContext();
+   184→    const elapsed = ctx.currentTime - loopStartTime;
+   185→    const loopDur = getLoopDuration();
+   186→    const position = (elapsed % loopDur) / loopDur;
+   187→    onPositionChange(position);
+   188→    animFrameId = requestAnimationFrame(updateVisual);
+   189→  }
+   190→
+   191→  function stopAllVoices() {
+   192→    for (const v of activeVoices) {
+   193→      v.voice.stop();
+   194→    }
+   195→    activeVoices.length = 0;
+   196→  }
+   197→
+   198→  return {
+   199→    start() {
+   200→      if (playing) return;
+   201→      playing = true;
+   202→      void ensureResumed();
+   203→      const ctx = getAudioContext();
+   204→      loopStartTime = ctx.currentTime;
+   205→      lastScheduledCol = -1;
+   206→
+   207→      schedulerTimer = setInterval(schedule, SCHEDULE_INTERVAL_MS);
+   208→      schedule(); // immediate first pass
+   209→      animFrameId = requestAnimationFrame(updateVisual);
+   210→    },
+   211→
+   212→    stop() {
+   213→      if (!playing) return;
+   214→      playing = false;
+   215→      if (schedulerTimer !== null) {
+   216→        clearInterval(schedulerTimer);
+   217→        schedulerTimer = null;
+   218→      }
+   219→      if (animFrameId) {
+   220→        cancelAnimationFrame(animFrameId);
+   221→        animFrameId = 0;
+   222→      }
+   223→      stopAllVoices();
+   224→      onPositionChange(-1); // hide playhead
+   225→    },
+   226→
+   227→    isPlaying: () =&gt; playing,
+   228→    getPosition() {
+   229→      if (!playing) return 0;
+   230→      const ctx = getAudioContext();
+   231→      const elapsed = ctx.currentTime - loopStartTime;
+   232→      return (elapsed % getLoopDuration()) / getLoopDuration();
+   233→    },
+   234→  };
+   235→}
+   236→</pre></div><button class="expand-btn">Show more</button></div></div></div></div><details class="continuation"><summary>Session continuation summary</summary>
+<div class="message user" id="msg-2026-03-23T17-59-22-197Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-03-23T17-59-22-197Z" class="timestamp-link"><time datetime="2026-03-23T17:59:22.197Z" data-timestamp="2026-03-23T17:59:22.197Z">2026-03-23T17:59:22.197Z</time></a></div><div class="message-content">
+<div class="user-content"><p>This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.</p>
+<p>Summary:
+1. Primary Request and Intent:
+   The user is building "Sound Painter" — a browser-based audio toy where painting on a 2D canvas creates sound. The spec prioritizes interesting, textured sound over absolute fidelity to the color metaphor. Key requirements: vanilla TypeScript with Vite (no React), strict TS mode, DTOs and functions over classes, minimal 3rd party deps, GitHub Pages deployment. The user wants git init first, each implementation stage (2+) on separate branches, and push to GitHub at the very end. The project has evolved through 5 stages with significant user-directed design changes along the way, most recently pivoting from a column-scanning playhead to a stroke-replay system.</p>
+<ol>
+<li>Key Technical Concepts:</li>
+<li>Web Audio API for all synthesis (no Tone.js or external libs)</li>
+<li>HSL-derived voice synthesis: hue→waveform character, saturation→harmonic richness, lightness→pitch</li>
+<li>Position modulation: X-axis→filter cutoff brightness, Y-axis→pitch shift + reverb depth</li>
+<li>Per-brush effect chains: reverb (synthetic IR), chorus (LFO-modulated delay), distortion+slap delay, tremolo</li>
+<li>Canvas2D with offscreen buffer for accumulated strokes</li>
+<li>BrushState pattern for persistent per-stroke state (bristle tracking)</li>
+<li><code>destination-out</code> compositing for eraser tools</li>
+<li><code>multiply</code> compositing for paint mixing at overlaps</li>
+<li>Density-scaled voice gain (1/sqrt(n)) to prevent cacophony</li>
+<li>Web Audio clock scheduling with lookahead pattern (not setInterval)</li>
+<li>Normalized coordinates (0..1) for resolution-independent painting data</li>
+<li>
+<p>Debug parameter system with runtime-adjustable sliders</p>
+</li>
+<li>
+<p>Files and Code Sections:</p>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/SPEC.md</code></p>
+<ul>
+<li>Original project specification, read at start</li>
+<li>Defines the core concept: color=timbre, brush=effects, direction=tone change</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/PLAN.md</code></p>
+<ul>
+<li>Implementation plan with 7 stages, architecture, data model, audio design</li>
+<li>Updated to reflect HSL-derived voices and inverted filter mapping</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/package.json</code></p>
+<ul>
+<li>Vite + TypeScript devDependencies only</li>
+<li>Scripts: dev, build, preview</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/tsconfig.json</code></p>
+<ul>
+<li>Strict mode, noUnusedLocals, noUnusedParameters, ES2022 target, ESNext modules</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/vite.config.ts</code></p>
+<ul>
+<li><code>base: '/soundpaint/'</code> for GitHub Pages</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/index.html</code></p>
+<ul>
+<li>Canvas + toolbar with color-picker, brush-picker, mode toggle [Live|Playhead], Clear button</li>
+<li>Current state:
+ <code>html
+ &lt;div class="toolbar-group controls"&gt;
+   &lt;div class="mode-toggle"&gt;
+     &lt;button id="btn-live" type="button" class="mode-btn active"&gt;Live&lt;/button&gt;
+     &lt;button id="btn-playhead" type="button" class="mode-btn"&gt;Playhead&lt;/button&gt;
+   &lt;/div&gt;
+   &lt;button id="btn-clear" type="button"&gt;Clear&lt;/button&gt;
+ &lt;/div&gt;</code></li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/types.ts</code></p>
+<ul>
+<li>Core DTOs for the entire app
+ <code>typescript
+ export type PaintBrush = 'oil-flat' | 'oil-round' | 'palette-knife' | 'dry-brush';
+ export type EraserTool = 'scraper' | 'solvent';
+ export type BrushType = PaintBrush | EraserTool;
+ export type PaletteColor = {
+   readonly name: string;
+   readonly rgb: readonly [number, number, number];
+   readonly hsl: readonly [number, number, number];
+ };
+ export type StrokePoint = {
+   readonly x: number; readonly y: number;
+   readonly pressure: number; readonly timestamp: number;
+ };
+ export type Stroke = {
+   readonly id: string; readonly color: PaletteColor;
+   readonly brush: BrushType; readonly points: readonly StrokePoint[];
+ };
+ export type Painting = {
+   readonly version: 1; readonly canvasAspect: number;
+   readonly loopLengthMs: number; readonly strokes: readonly Stroke[];
+ };</code></li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/main.ts</code></p>
+<ul>
+<li>Entry point wiring controls, canvas, audio, playhead, debug panel, keyboard shortcuts</li>
+<li>Holds mutable <code>painting</code> state, <code>activeStrokes</code> map</li>
+<li>Live audition only triggers in 'live' mode for non-eraser brushes</li>
+<li>Keyboard shortcuts: Space toggles mode, Escape→Live, Delete→clear</li>
+<li>Destructures <code>{ state: controls, setMode }</code> from initControls</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/canvas/brushes.ts</code></p>
+<ul>
+<li>BrushState with persistent Bristle[] for oil-round</li>
+<li>createBrushState factory</li>
+<li>6 brush renderers: oilFlat, oilRound (persistent bristles), paletteKnife, dryBrush, scraper (destination-out), solvent (radial dissolution)</li>
+<li>velocityWidthMul for stroke width variation (fast=thin 0.4x, slow=thick 1.3x)</li>
+<li>renderSegment applies <code>multiply</code> composite for paint brushes, not erasers</li>
+<li>Scraper: width 20-50, alpha 0.85-1.0, edge marks alpha 0.7</li>
+<li>Solvent: radius 25-55, dab alpha 0.15-0.4, central dissolve 0.25-0.5</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/canvas/renderer.ts</code></p>
+<ul>
+<li>createRenderer with offscreen buffer canvas, DPR-aware sizing</li>
+<li>Canvas grain texture (createGrainPattern - subtle noise at alpha 30)</li>
+<li>compositeFrame: grain → buffer → playhead line</li>
+<li>drawSegment passes BrushState through to renderSegment</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/canvas/stroke-recorder.ts</code></p>
+<ul>
+<li>PointerEvent capture with normalized coords (0..1)</li>
+<li>ERASER_COLOR sentinel for null color</li>
+<li>getActiveColor returns PaletteColor | null</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/canvas/palette.ts</code></p>
+<ul>
+<li>DEFAULT_PALETTE: 5 colors (Cadmium Red, Cobalt Blue, Lavender, Ochre Gold, Titanium White)</li>
+<li>EMPTY_SLOTS = 3</li>
+<li>createPalette() returns mutable (PaletteColor | null)[]</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/audio/engine.ts</code></p>
+<ul>
+<li>Singleton AudioContext, master GainNode (0.7), DynamicsCompressorNode</li>
+<li>getAudioContext(), getMasterOutput(), ensureResumed()</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/audio/mappings.ts</code></p>
+<ul>
+<li>voiceParamsFromColor: HSL → VoiceParams (baseFreq, oscillators, filter, noise, envelopes)</li>
+<li>All values read from debugParams: baseFreqMin/Max, detuneMax, noiseMax, filterCutoffMin/Max, pitchShiftRange, reverbMixMin/Max</li>
+<li>Filter mapping (inverted): warmth &gt; 0.5 → highpass, &gt; 0.2 → bandpass, else → lowpass</li>
+<li>positionMod: x→filterCutoffMul (exponential curve), x→brightness, y→pitchShift, y→reverbMix</li>
+<li>hueWarmth function: reds/oranges warm (0.85-1.0), blues/purples cool (0.0-0.2)</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/audio/voices.ts</code></p>
+<ul>
+<li>createVoice(params, mod, velocity, gainScale): layered oscillators with random detuning, band-passed noise, filter, attack/release envelopes</li>
+<li>Peak gain from debugParams.peakGain * gainScale</li>
+<li>updatePosition for real-time filter/brightness modulation</li>
+<li>Cached noise buffer</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/audio/effects.ts</code></p>
+<ul>
+<li>Per-brush effect chains, cached: oil-flat→reverb (synthetic IR), oil-round→chorus (2 LFO delays), palette-knife→waveshaper+slap delay, dry-brush→square tremolo 35Hz</li>
+<li>Erasers get passthrough chain</li>
+<li>Synthetic reverb IR: 2.5s duration, 0.6 decay, exponentially decaying noise</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</code></p>
+<ul>
+<li>ABOUT TO BE REPLACED with stroke replay system</li>
+<li>Currently: 128-column scanner, 50ms lookahead, 25ms schedule interval</li>
+<li>Density-scaled gain, voice stealing at debugParams.maxVoices</li>
+<li>Visual playhead position callback</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/ui/controls.ts</code></p>
+<ul>
+<li>AudioMode = 'live' | 'playhead'</li>
+<li>ControlState: activeColor, activeBrush, palette, audioMode</li>
+<li>initControls returns { state: ControlState, setMode: (mode) =&gt; void }</li>
+<li>Color swatches: click=select, dblclick=edit via hidden color input</li>
+<li>Empty slots show dashed outline, dblclick to fill</li>
+<li>Brush picker: paint brushes + separator + eraser tools</li>
+<li>Mode toggle: [Live | Playhead] segmented control</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/ui/debug.ts</code></p>
+<ul>
+<li>DebugParams type with 13 tunable parameters</li>
+<li>debugParams singleton exported and imported by mappings, voices, playhead</li>
+<li>Gear icon in bottom-right reveals collapsible panel with sliders</li>
+<li>"Log values to console" button for exporting tuned values</li>
+<li>Parameters: masterGain, peakGain, maxVoices, voiceOverlap, filterCutoffMin/Max, pitchShiftRange, reverbMixMin/Max, baseFreqMin/Max, detuneMax, noiseMax</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/utils/math.ts</code></p>
+<ul>
+<li>lerp, clamp, scale functions</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/utils/color.ts</code></p>
+<ul>
+<li>hexToRgb, rgbToHex, rgbToHsl</li>
+</ul>
+</li>
+<li>
+<p><code>/Users/rt/code/personal/soundpaint/src/style.css</code></p>
+<ul>
+<li>Soft white background (#faf9f6), canvas with crosshair cursor, touch-action:none</li>
+<li>Swatch styles (circles, active border, empty dashed), brush buttons, eraser buttons (dashed border)</li>
+<li>Mode toggle (segmented control), toolbar separator</li>
+<li>Debug panel (fixed bottom-right, 280px wide, gear toggle at 50% opacity)</li>
+</ul>
+</li>
+<li>
+<p>Errors and Fixes:</p>
+</li>
+<li><strong>PointerEvent spread bug</strong>: <code>{ ...e, pressure: e.pressure } as PointerEvent</code> — spreading DOM events loses prototype properties (clientX, clientY all become undefined/NaN). Fixed by passing the original event directly and setting up activeStroke before calling normalizePoint.</li>
+<li><strong>createAudioBuffer</strong>: Used wrong API name in voices.ts and effects.ts. Fixed by replacing with <code>createBuffer</code>.</li>
+<li><strong>Float32Array type mismatch</strong>: <code>Float32Array&lt;ArrayBufferLike&gt;</code> not assignable to <code>Float32Array&lt;ArrayBuffer&gt;</code>. Fixed by explicitly typing as <code>Float32Array&lt;ArrayBuffer&gt;</code>.</li>
+<li><strong>Unused variables (TS strict)</strong>: animFrameId, velocityFromPoints import, <code>v</code> in cleanup loop, <code>currentCol</code> unused. Fixed by removing or prefixing with underscore.</li>
+<li><strong>PaletteColor namespace error</strong>: Used <code>typeof import('../types').PaletteColor.prototype</code> instead of proper import. Fixed by importing PaletteColor type and using directly.</li>
+<li><strong>initControls return type</strong>: Changed return from <code>ControlState</code> to <code>{ state, setMode }</code> but forgot to update the function signature. Fixed by updating the return type annotation.</li>
+<li><strong><code>scale</code> variable rename</strong>: In oilRound, renamed <code>scale</code> to <code>sc</code> but missed updating <code>bristle.thickness * scale</code> reference. Fixed by changing to <code>bristle.thickness * sc</code>.</li>
+<li><strong>User feedback - brushes not working</strong>: The PointerEvent spread bug above — user reported brushes weren't working at all, root cause was NaN coordinates.</li>
+<li><strong>User feedback - erasers not pronounced</strong>: Alpha values too low for scraper (0.6→0.85) and solvent (0.05-0.15→0.15-0.4). Bumped radius sizes too.</li>
+<li><strong>User feedback - playhead cacophonous</strong>: Too many overlapping voices at full volume. Fixed with density-scaled gain (1/sqrt(n)), reduced overlap (1.5x→1.1x), lowered peak gain (0.25→0.2).</li>
+<li>
+<p><strong>User feedback - filter mapping</strong>: Originally warm→lowpass, then changed to warm→bandpass, finally inverted to warm→highpass, cool→lowpass per user request for cool hues to sound "rounder and fuller."</p>
+</li>
+<li>
+<p>Problem Solving:</p>
+</li>
+<li>Solved the physical brush feel by adding persistent BrushState with bristle tracking across segments</li>
+<li>Solved cacophonous playhead with density-based gain scaling and reduced overlap</li>
+<li>Solved parameter tuning workflow by creating debug panel with runtime sliders</li>
+<li>Made audio work with arbitrary user-chosen colors by deriving all voice params from HSL values</li>
+<li>Used synthetic impulse response for reverb to avoid external file dependencies</li>
+<li>
+<p>Currently solving the fundamental playhead noise issue by replacing column scanner with stroke replay</p>
+</li>
+<li>
+<p>All User Messages:</p>
+</li>
+<li>"Take a look at @SPEC.md and let's get started. git init a repo, but we will push to Github at the very, very end. Each stage in the plan starting with 2 will be done on a separate branch. The sound being interesting and textured is more important than absolute fidelity to the color metaphor."</li>
+<li>"Going to run this with npm run dev and play with it."</li>
+<li>"Can you copy your internal plan to PLAN.md so I can commit it?"</li>
+<li>"Is there a way to make the 'Round' tool more like a physical brush?"</li>
+<li>"Yes, Option 2"</li>
+<li>"Nice! Commit."</li>
+<li>"While I want to start with the existing default palette. I also want the user to be able to edit the color of a slot in the palette to change the sound."</li>
+<li>"Great! Let's also add a couple of 'empty' spots on the palette for the user to fill in while still being able to use the default palette. Also - how to make 'erase' more like actually removing material on a painting?"</li>
+<li>(Answered eraser questions: solvent wash with fluid feel + scraper for precise, two erase tools)</li>
+<li>"Looks sweet. Let's commit these changes and move on to Stage 3..."</li>
+<li>"The brushes aren't working"</li>
+<li>"Cool! How should we handle looping? Does it play the entire 'canvas' on each brush stroke?"</li>
+<li>"The live audition just plays the sound for the current stroke, correct?"</li>
+<li>"Great - I might expand the ranges on the X and Y axes to make them more dramatic, but let's commit Stage 3."</li>
+<li>"Let's have a single button for Play/Stop that toggles the label as appropriate."</li>
+<li>"Commit, then move on to Stage 4."</li>
+<li>"Solvent and scraper don't seem to be very pronounced."</li>
+<li>"Let's also be able to toggle between 'live audition' and 'play head' mode... I really like live audition..."</li>
+<li>"Let's make the ranges on the axes more dramatic."</li>
+<li>"I like the playhead loop... but it does feel a bit cacophonous"</li>
+<li>"Can you expose these parameters as 'debug' sliders so that I can play with them? Maybe a small icon reveals them. This way I can play around with them and determine the defaults I want to ship with."</li>
+<li>"Explain the color / sound model a bit more to me."</li>
+<li>"Let's have the warm hues get the band-pass and the low hues get the low-pass."</li>
+<li>"The coldest hues should be rounder and fuller still..."</li>
+<li>"Yeah, that's nice. Let's commit what we have so far."</li>
+<li>"Look over Stage 5 -- what's left there that we haven't done?"</li>
+<li>"2 - 5 first, then we'll revisit 1."</li>
+<li>"Let's commit."</li>
+<li>"The playhead is still a bit too noisy. One alternative is to instead have 'play back', which essentially replays all of the strokes in sequence that they were added..."</li>
+<li>
+<p>(Answered: Replace scanner with replay, sound only - no visual redraw)</p>
+</li>
+<li>
+<p>Pending Tasks:</p>
+</li>
+<li>Replace column-scanning playhead with stroke-replay system (user confirmed: replace scanner, sound only)</li>
+<li>Update mode toggle label from "Playhead" to "Replay"</li>
+<li>Revisit item 1 from Stage 5 (smooth parameter interpolation) after replay is done</li>
+<li>Stage 6: Sharing via Gist (JSON export/import)</li>
+<li>Stage 7: Deploy to GitHub Pages</li>
+<li>
+<p>Bake in final debug parameter defaults once user is happy with tuning</p>
+</li>
+<li>
+<p>Current Work:
+   On branch <code>stage-5-polish</code>. Just committed Stage 5 polish (paint mixing, canvas grain, velocity width, keyboard shortcuts). The user then said the playhead is still too noisy and proposed replacing the column scanner with a stroke-replay system. I asked two clarifying questions:</p>
+</li>
+<li>Replace scanner vs third mode → User chose "Replace the scanner"</li>
+<li>Visual replay vs sound only → User chose "Sound only"</li>
+</ol>
+<p>I had just read the full contents of <code>/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</code> (the file to be rewritten) and was about to start implementing the stroke replay system when the summary was requested.</p>
+<p>The replay system needs to:
+   - Sort strokes by their first point timestamp (order painted)
+   - Schedule voice events following each stroke's point trajectory using recorded timestamps
+   - Loop after all strokes have played (or after loop duration)
+   - Keep the visual playhead position callback (sound only, canvas stays as-is)
+   - Update mode toggle label from "Playhead" to "Replay"
+   - Remove column-scanning code entirely</p>
+<ol>
+<li>Optional Next Step:
+   Implement the stroke-replay system to replace the column-scanning playhead. The user said: "The playhead is still a bit too noisy. One alternative is to instead have 'play back', which essentially replays all of the strokes in sequence that they were added..." and confirmed: replace the scanner (not third mode), sound only (no visual redraw). I had just read playhead.ts and was about to rewrite it when the summary was requested. The mode toggle in index.html should change from "Playhead" to "Replay".</li>
+</ol>
+<p>If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/rt/.claude/projects/-Users-rt-code-personal-soundpaint/00ac7e4b-b41c-4fda-84a4-2dd97adb32d5.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.</p></div></div></div></details>
+<div class="message assistant" id="msg-2026-03-23T17-59-25-957Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-25-957Z" class="timestamp-link"><time datetime="2026-03-23T17:59:25.957Z" data-timestamp="2026-03-23T17:59:25.957Z">2026-03-23T17:59:25.957Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-26-424Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-26-424Z" class="timestamp-link"><time datetime="2026-03-23T17:59:26.424Z" data-timestamp="2026-03-23T17:59:26.424Z">2026-03-23T17:59:26.424Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01W3gEFN5FgMpLR1zJTSuH7r"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/playhead.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-59-26-438Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-59-26-438Z" class="timestamp-link"><time datetime="2026-03-23T17:59:26.438Z" data-timestamp="2026-03-23T17:59:26.438Z">2026-03-23T17:59:26.438Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import type { BrushType, EraserTool, PaletteColor, Painting, StrokePoint } from &#x27;../types&#x27;;
+     2→import { getAudioContext, ensureResumed } from &#x27;./engine&#x27;;
+     3→import { createVoice, type Voice } from &#x27;./voices&#x27;;
+     4→import { voiceParamsFromColor, positionMod } from &#x27;./mappings&#x27;;
+     5→import { getEffectChain } from &#x27;./effects&#x27;;
+     6→import { debugParams } from &#x27;../ui/debug&#x27;;
+     7→
+     8→const COLUMNS = 128;
+     9→const LOOKAHEAD_MS = 50;
+    10→const SCHEDULE_INTERVAL_MS = 25;
+    11→
+    12→const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#x27;scraper&#x27;, &#x27;solvent&#x27;]);
+    13→
+    14→export type Playhead = {
+    15→  start: () =&gt; void;
+    16→  stop: () =&gt; void;
+    17→  isPlaying: () =&gt; boolean;
+    18→  getPosition: () =&gt; number; // 0..1 normalized X position
+    19→};
+    20→
+    21→type ActivePlayheadVoice = {
+    22→  voice: Voice;
+    23→  startedAtCol: number;
+    24→};
+    25→
+    26→export function createPlayhead(
+    27→  getPainting: () =&gt; Painting,
+    28→  onPositionChange: (x: number) =&gt; void,
+    29→): Playhead {
+    30→  let playing = false;
+    31→  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+    32→  let animFrameId = 0;
+    33→  let loopStartTime = 0; // AudioContext time when loop started
+    34→  let lastScheduledCol = -1;
+    35→  const activeVoices: ActivePlayheadVoice[] = [];
+    36→
+    37→  function getLoopDuration(): number {
+    38→    return getPainting().loopLengthMs / 1000; // seconds
+    39→  }
+    40→
+    41→  function getColumnDuration(): number {
+    42→    return getLoopDuration() / COLUMNS;
+    43→  }
+    44→
+    45→  // Find strokes that pass through a given column (normalized X range)
+    46→  function strokesAtColumn(col: number): { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] {
+    47→    const painting = getPainting();
+    48→    const colStart = col / COLUMNS;
+    49→    const colEnd = (col + 1) / COLUMNS;
+    50→    const results: { color: PaletteColor; brush: BrushType; avgPoint: StrokePoint }[] = [];
+    51→
+    52→    for (const stroke of painting.strokes) {
+    53→      if (ERASERS.has(stroke.brush)) continue;
+    54→
+    55→      // Find points within this column&#x27;s X range
+    56→      const pointsInCol: StrokePoint[] = [];
+    57→      for (const pt of stroke.points) {
+    58→        if (pt.x &gt;= colStart &amp;&amp; pt.x &lt; colEnd) {
+    59→          pointsInCol.push(pt);
+    60→        }
+    61→      }
+    62→      // Also check segments that cross through this column
+    63→      for (let i = 1; i &lt; stroke.points.length; i++) {
+    64→        const a = stroke.points[i - 1];
+    65→        const b = stroke.points[i];
+    66→        if ((a.x &lt; colStart &amp;&amp; b.x &gt;= colStart) || (a.x &gt;= colEnd &amp;&amp; b.x &lt; colEnd)) {
+    67→          // Interpolate a point at the column boundary
+    68→          const t = (colStart - a.x) / (b.x - a.x);
+    69→          if (t &gt;= 0 &amp;&amp; t &lt;= 1) {
+    70→            pointsInCol.push({
+    71→              x: colStart,
+    72→              y: a.y + (b.y - a.y) * t,
+    73→              pressure: a.pressure + (b.pressure - a.pressure) * t,
+    74→              timestamp: a.timestamp + (b.timestamp - a.timestamp) * t,
+    75→            });
+    76→          }
+    77→        }
+    78→      }
+    79→
+    80→      if (pointsInCol.length === 0) continue;
+    81→
+    82→      // Average the points for this stroke in this column
+    83→      let sumX = 0, sumY = 0, sumP = 0;
+    84→      for (const p of pointsInCol) {
+    85→        sumX += p.x;
+    86→        sumY += p.y;
+    87→        sumP += p.pressure;
+    88→      }
+    89→      const n = pointsInCol.length;
+    90→      results.push({
+    91→        color: stroke.color,
+    92→        brush: stroke.brush,
+    93→        avgPoint: {
+    94→          x: sumX / n,
+    95→          y: sumY / n,
+    96→          pressure: sumP / n,
+    97→          timestamp: 0,
+    98→        },
+    99→      });
+   100→    }
+   101→
+   102→    return results;
+   103→  }
+   104→
+   105→  function triggerColumn(col: number, when: number) {
+   106→    const colDur = getColumnDuration();
+   107→    const hits = strokesAtColumn(col);
+   108→
+   109→    // Scale gain down when many strokes hit the same column
+   110→    const density = hits.length;
+   111→    const gainScale = density &lt;= 1 ? 1.0 : 1.0 / Math.sqrt(density);
+   112→
+   113→    for (const hit of hits) {
+   114→      // Voice stealing: remove oldest if at limit
+   115→      while (activeVoices.length &gt;= debugParams.maxVoices) {
+   116→        const oldest = activeVoices.shift()!;
+   117→        oldest.voice.stop();
+   118→      }
+   119→
+   120→      const params = voiceParamsFromColor(hit.color);
+   121→      const mod = positionMod(hit.avgPoint);
+   122→      const voice = createVoice(params, mod, hit.avgPoint.pressure, gainScale);
+   123→      const chain = getEffectChain(hit.brush);
+   124→      voice.output.connect(chain.input);
+   125→
+   126→      // Schedule stop — overlap controlled by debug slider
+   127→      voice.stop(when + colDur * debugParams.voiceOverlap);
+   128→
+   129→      activeVoices.push({ voice, startedAtCol: col });
+   130→    }
+   131→
+   132→    // Clean up voices that have finished
+   133→    const now = getAudioContext().currentTime;
+   134→    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+   135→      const age = (now - when) + (col - activeVoices[i].startedAtCol) * colDur;
+   136→      if (age &gt; colDur * 2) {
+   137→        activeVoices.splice(i, 1);
+   138→      }
+   139→    }
+   140→  }
+   141→
+   142→  function schedule() {
+   143→    const ctx = getAudioContext();
+   144→    const now = ctx.currentTime;
+   145→    const loopDur = getLoopDuration();
+   146→    const colDur = getColumnDuration();
+   147→    const lookaheadSec = LOOKAHEAD_MS / 1000;
+   148→
+   149→    // How far into the loop are we?
+   150→    const elapsed = now - loopStartTime;
+   151→
+   152→    // Schedule columns up to the lookahead window
+   153→    const endTime = now + lookaheadSec;
+   154→    let col = lastScheduledCol + 1;
+   155→    if (col &gt;= COLUMNS) col = 0;
+   156→
+   157→    while (true) {
+   158→      // Time when this column should play
+   159→      const colLoopTime = (col / COLUMNS) * loopDur;
+   160→      // Which loop iteration are we in?
+   161→      const loopIteration = Math.floor(elapsed / loopDur);
+   162→      let colAbsTime = loopStartTime + loopIteration * loopDur + colLoopTime;
+   163→
+   164→      // If this column&#x27;s time has already passed in this iteration, it&#x27;s in the next one
+   165→      if (colAbsTime &lt; now - colDur) {
+   166→        colAbsTime += loopDur;
+   167→      }
+   168→
+   169→      if (colAbsTime &gt; endTime) break;
+   170→      if (colAbsTime &gt;= now - 0.01) {
+   171→        triggerColumn(col, colAbsTime);
+   172→        lastScheduledCol = col;
+   173→      }
+   174→
+   175→      col = (col + 1) % COLUMNS;
+   176→      // Safety: don&#x27;t schedule more than COLUMNS in one pass
+   177→      if (col === (lastScheduledCol + 1) % COLUMNS) break;
+   178→    }
+   179→  }
+   180→
+   181→  function updateVisual() {
+   182→    if (!playing) return;
+   183→    const ctx = getAudioContext();
+   184→    const elapsed = ctx.currentTime - loopStartTime;
+   185→    const loopDur = getLoopDuration();
+   186→    const position = (elapsed % loopDur) / loopDur;
+   187→    onPositionChange(position);
+   188→    animFrameId = requestAnimationFrame(updateVisual);
+   189→  }
+   190→
+   191→  function stopAllVoices() {
+   192→    for (const v of activeVoices) {
+   193→      v.voice.stop();
+   194→    }
+   195→    activeVoices.length = 0;
+   196→  }
+   197→
+   198→  return {
+   199→    start() {
+   200→      if (playing) return;
+   201→      playing = true;
+   202→      void ensureResumed();
+   203→      const ctx = getAudioContext();
+   204→      loopStartTime = ctx.currentTime;
+   205→      lastScheduledCol = -1;
+   206→
+   207→      schedulerTimer = setInterval(schedule, SCHEDULE_INTERVAL_MS);
+   208→      schedule(); // immediate first pass
+   209→      animFrameId = requestAnimationFrame(updateVisual);
+   210→    },
+   211→
+   212→    stop() {
+   213→      if (!playing) return;
+   214→      playing = false;
+   215→      if (schedulerTimer !== null) {
+   216→        clearInterval(schedulerTimer);
+   217→        schedulerTimer = null;
+   218→      }
+   219→      if (animFrameId) {
+   220→        cancelAnimationFrame(animFrameId);
+   221→        animFrameId = 0;
+   222→      }
+   223→      stopAllVoices();
+   224→      onPositionChange(-1); // hide playhead
+   225→    },
+   226→
+   227→    isPlaying: () =&gt; playing,
+   228→    getPosition() {
+   229→      if (!playing) return 0;
+   230→      const ctx = getAudioContext();
+   231→      const elapsed = ctx.currentTime - loopStartTime;
+   232→      return (elapsed % getLoopDuration()) / getLoopDuration();
+   233→    },
+   234→  };
+   235→}
+   236→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-26-925Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-26-925Z" class="timestamp-link"><time datetime="2026-03-23T17:59:26.925Z" data-timestamp="2026-03-23T17:59:26.925Z">2026-03-23T17:59:26.925Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_014JyCwWoT2F5n9dJvoAebYf"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/types.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-59-26-931Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-59-26-931Z" class="timestamp-link"><time datetime="2026-03-23T17:59:26.931Z" data-timestamp="2026-03-23T17:59:26.931Z">2026-03-23T17:59:26.931Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→export type PaintBrush = &#x27;oil-flat&#x27; | &#x27;oil-round&#x27; | &#x27;palette-knife&#x27; | &#x27;dry-brush&#x27;;
+     2→export type EraserTool = &#x27;scraper&#x27; | &#x27;solvent&#x27;;
+     3→export type BrushType = PaintBrush | EraserTool;
+     4→
+     5→export type PaletteColor = {
+     6→  readonly name: string;
+     7→  readonly rgb: readonly [number, number, number];
+     8→  readonly hsl: readonly [number, number, number];
+     9→};
+    10→
+    11→export type StrokePoint = {
+    12→  readonly x: number;
+    13→  readonly y: number;
+    14→  readonly pressure: number;
+    15→  readonly timestamp: number;
+    16→};
+    17→
+    18→export type Stroke = {
+    19→  readonly id: string;
+    20→  readonly color: PaletteColor;
+    21→  readonly brush: BrushType;
+    22→  readonly points: readonly StrokePoint[];
+    23→};
+    24→
+    25→export type Painting = {
+    26→  readonly version: 1;
+    27→  readonly canvasAspect: number;
+    28→  readonly loopLengthMs: number;
+    29→  readonly strokes: readonly Stroke[];
+    30→};
+    31→
+    32→export type PlaybackState =
+    33→  | { readonly status: &#x27;stopped&#x27; }
+    34→  | { readonly status: &#x27;playing&#x27;; readonly startedAt: number; readonly loopLengthMs: number };
+    35→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-27-103Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-27-103Z" class="timestamp-link"><time datetime="2026-03-23T17:59:27.103Z" data-timestamp="2026-03-23T17:59:27.103Z">2026-03-23T17:59:27.103Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CjnN6fY3ieCPn3HWeM6rUv"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/ui/debug.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-59-27-111Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-59-27-111Z" class="timestamp-link"><time datetime="2026-03-23T17:59:27.111Z" data-timestamp="2026-03-23T17:59:27.111Z">2026-03-23T17:59:27.111Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→export type DebugParams = {
+     2→  // Position modulation
+     3→  filterCutoffMin: number;
+     4→  filterCutoffMax: number;
+     5→  pitchShiftRange: number;    // semitones +/-
+     6→  reverbMixMin: number;
+     7→  reverbMixMax: number;
+     8→
+     9→  // Voice
+    10→  baseFreqMin: number;
+    11→  baseFreqMax: number;
+    12→  detuneMax: number;          // max cents at full saturation
+    13→  noiseMax: number;           // max noise amount at full warmth*saturation
+    14→  peakGain: number;
+    15→
+    16→  // Playhead
+    17→  voiceOverlap: number;       // column duration multiplier
+    18→  maxVoices: number;
+    19→
+    20→  // Master
+    21→  masterGain: number;
+    22→};
+    23→
+    24→export const debugParams: DebugParams = {
+    25→  filterCutoffMin: 0.08,
+    26→  filterCutoffMax: 6.0,
+    27→  pitchShiftRange: 14,
+    28→  reverbMixMin: 0.05,
+    29→  reverbMixMax: 0.9,
+    30→  baseFreqMin: 55,
+    31→  baseFreqMax: 880,
+    32→  detuneMax: 25,
+    33→  noiseMax: 0.25,
+    34→  peakGain: 0.2,
+    35→  voiceOverlap: 1.1,
+    36→  maxVoices: 16,
+    37→  masterGain: 0.7,
+    38→};
+    39→
+    40→type SliderDef = {
+    41→  key: keyof DebugParams;
+    42→  label: string;
+    43→  min: number;
+    44→  max: number;
+    45→  step: number;
+    46→};
+    47→
+    48→const SLIDERS: SliderDef[] = [
+    49→  { key: &#x27;masterGain&#x27;, label: &#x27;Master Gain&#x27;, min: 0, max: 1.5, step: 0.05 },
+    50→  { key: &#x27;peakGain&#x27;, label: &#x27;Voice Gain&#x27;, min: 0.01, max: 0.5, step: 0.01 },
+    51→  { key: &#x27;maxVoices&#x27;, label: &#x27;Max Voices&#x27;, min: 1, max: 32, step: 1 },
+    52→  { key: &#x27;voiceOverlap&#x27;, label: &#x27;Voice Overlap&#x27;, min: 0.5, max: 3.0, step: 0.1 },
+    53→  { key: &#x27;filterCutoffMin&#x27;, label: &#x27;Filter Min (X=0)&#x27;, min: 0.01, max: 1.0, step: 0.01 },
+    54→  { key: &#x27;filterCutoffMax&#x27;, label: &#x27;Filter Max (X=1)&#x27;, min: 1.0, max: 12.0, step: 0.5 },
+    55→  { key: &#x27;pitchShiftRange&#x27;, label: &#x27;Pitch Shift +/-&#x27;, min: 0, max: 24, step: 1 },
+    56→  { key: &#x27;reverbMixMin&#x27;, label: &#x27;Reverb Min (Y=0)&#x27;, min: 0, max: 0.5, step: 0.01 },
+    57→  { key: &#x27;reverbMixMax&#x27;, label: &#x27;Reverb Max (Y=1)&#x27;, min: 0.1, max: 1.0, step: 0.05 },
+    58→  { key: &#x27;baseFreqMin&#x27;, label: &#x27;Base Freq Min&#x27;, min: 20, max: 200, step: 5 },
+    59→  { key: &#x27;baseFreqMax&#x27;, label: &#x27;Base Freq Max&#x27;, min: 200, max: 2000, step: 20 },
+    60→  { key: &#x27;detuneMax&#x27;, label: &#x27;Detune Max (cents)&#x27;, min: 0, max: 50, step: 1 },
+    61→  { key: &#x27;noiseMax&#x27;, label: &#x27;Noise Max&#x27;, min: 0, max: 0.5, step: 0.01 },
+    62→];
+    63→
+    64→export function initDebugPanel(onMasterGainChange: (v: number) =&gt; void): void {
+    65→  const toggle = document.createElement(&#x27;button&#x27;);
+    66→  toggle.type = &#x27;button&#x27;;
+    67→  toggle.className = &#x27;debug-toggle&#x27;;
+    68→  toggle.textContent = &#x27;\u2699&#x27;; // gear icon
+    69→  toggle.title = &#x27;Audio debug parameters&#x27;;
+    70→
+    71→  const panel = document.createElement(&#x27;div&#x27;);
+    72→  panel.className = &#x27;debug-panel hidden&#x27;;
+    73→
+    74→  const heading = document.createElement(&#x27;div&#x27;);
+    75→  heading.className = &#x27;debug-heading&#x27;;
+    76→  heading.textContent = &#x27;Audio Parameters&#x27;;
+    77→  panel.appendChild(heading);
+    78→
+    79→  for (const def of SLIDERS) {
+    80→    const row = document.createElement(&#x27;div&#x27;);
+    81→    row.className = &#x27;debug-row&#x27;;
+    82→
+    83→    const label = document.createElement(&#x27;label&#x27;);
+    84→    label.className = &#x27;debug-label&#x27;;
+    85→    label.textContent = def.label;
+    86→
+    87→    const value = document.createElement(&#x27;span&#x27;);
+    88→    value.className = &#x27;debug-value&#x27;;
+    89→    value.textContent = String(debugParams[def.key]);
+    90→
+    91→    const input = document.createElement(&#x27;input&#x27;);
+    92→    input.type = &#x27;range&#x27;;
+    93→    input.className = &#x27;debug-slider&#x27;;
+    94→    input.min = String(def.min);
+    95→    input.max = String(def.max);
+    96→    input.step = String(def.step);
+    97→    input.value = String(debugParams[def.key]);
+    98→
+    99→    input.addEventListener(&#x27;input&#x27;, () =&gt; {
+   100→      const v = parseFloat(input.value);
+   101→      (debugParams as Record&lt;string, number&gt;)[def.key] = v;
+   102→      value.textContent = def.step &gt;= 1 ? String(v) : v.toFixed(2);
+   103→      if (def.key === &#x27;masterGain&#x27;) onMasterGainChange(v);
+   104→    });
+   105→
+   106→    row.appendChild(label);
+   107→    row.appendChild(input);
+   108→    row.appendChild(value);
+   109→    panel.appendChild(row);
+   110→  }
+   111→
+   112→  // Export button — logs current values to console for easy copy
+   113→  const exportBtn = document.createElement(&#x27;button&#x27;);
+   114→  exportBtn.type = &#x27;button&#x27;;
+   115→  exportBtn.className = &#x27;debug-export&#x27;;
+   116→  exportBtn.textContent = &#x27;Log values to console&#x27;;
+   117→  exportBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
+   118→    console.log(&#x27;Debug params:&#x27;, JSON.stringify(debugParams, null, 2));
+   119→  });
+   120→  panel.appendChild(exportBtn);
+   121→
+   122→  toggle.addEventListener(&#x27;click&#x27;, () =&gt; {
+   123→    panel.classList.toggle(&#x27;hidden&#x27;);
+   124→  });
+   125→
+   126→  document.getElementById(&#x27;app&#x27;)!.appendChild(toggle);
+   127→  document.getElementById(&#x27;app&#x27;)!.appendChild(panel);
+   128→}
+   129→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-32-151Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-32-151Z" class="timestamp-link"><time datetime="2026-03-23T17:59:32.151Z" data-timestamp="2026-03-23T17:59:32.151Z">2026-03-23T17:59:32.151Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-32-642Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-32-642Z" class="timestamp-link"><time datetime="2026-03-23T17:59:32.642Z" data-timestamp="2026-03-23T17:59:32.642Z">2026-03-23T17:59:32.642Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check the Voice API quickly.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-33-157Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-33-157Z" class="timestamp-link"><time datetime="2026-03-23T17:59:33.157Z" data-timestamp="2026-03-23T17:59:33.157Z">2026-03-23T17:59:33.157Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_0133tgSFCUkttrppcHFRv6XT"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/src/audio/voices.ts&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-59-33-168Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-59-33-168Z" class="timestamp-link"><time datetime="2026-03-23T17:59:33.168Z" data-timestamp="2026-03-23T17:59:33.168Z">2026-03-23T17:59:33.168Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→import { getAudioContext } from &#x27;./engine&#x27;;
+     2→import type { VoiceParams, PositionMod } from &#x27;./mappings&#x27;;
+     3→import { debugParams } from &#x27;../ui/debug&#x27;;
+     4→
+     5→export type Voice = {
+     6→  output: GainNode;
+     7→  stop: (when?: number) =&gt; void;
+     8→  updatePosition: (mod: PositionMod) =&gt; void;
+     9→};
+    10→
+    11→export function createVoice(
+    12→  params: VoiceParams,
+    13→  mod: PositionMod,
+    14→  velocity: number,
+    15→  gainScale = 1.0,
+    16→): Voice {
+    17→  const ctx = getAudioContext();
+    18→  const now = ctx.currentTime;
+    19→
+    20→  // Master voice gain with envelope
+    21→  const voiceGain = ctx.createGain();
+    22→  voiceGain.gain.setValueAtTime(0, now);
+    23→  const attackTime = params.attackTime * (1 - velocity * 0.5); // faster attack at high velocity
+    24→  const peakGain = debugParams.peakGain * gainScale;
+    25→  voiceGain.gain.linearRampToValueAtTime(peakGain, now + attackTime);
+    26→
+    27→  // Filter
+    28→  const filter = ctx.createBiquadFilter();
+    29→  filter.type = params.filterType;
+    30→  filter.frequency.value = params.filterFreq * mod.filterCutoffMul;
+    31→  filter.Q.value = params.filterQ;
+    32→  filter.connect(voiceGain);
+    33→
+    34→  // Pitch shift from Y position
+    35→  const freqMul = Math.pow(2, mod.pitchShift / 12);
+    36→  const baseFreq = params.baseFreq * freqMul;
+    37→
+    38→  // Oscillators
+    39→  const oscs: OscillatorNode[] = [];
+    40→  const oscGains: GainNode[] = [];
+    41→
+    42→  for (let i = 0; i &lt; params.oscillators.length; i++) {
+    43→    const spec = params.oscillators[i];
+    44→    const osc = ctx.createOscillator();
+    45→    osc.type = spec.type;
+    46→    osc.frequency.value = baseFreq * (i === 0 ? 1 : i + 1); // harmonic series
+    47→    // Detune for richness
+    48→    osc.detune.value = (Math.random() - 0.5) * 2 * spec.detuneRange;
+    49→
+    50→    const oscGain = ctx.createGain();
+    51→    // Upper partials boosted by brightness (X position)
+    52→    const brightBoost = i &gt; 0 ? mod.brightness * 0.5 : 0;
+    53→    oscGain.gain.value = spec.gainScale * (1 + brightBoost);
+    54→
+    55→    osc.connect(oscGain);
+    56→    oscGain.connect(filter);
+    57→    osc.start(now);
+    58→    oscs.push(osc);
+    59→    oscGains.push(oscGain);
+    60→  }
+    61→
+    62→  // Noise layer — filtered band around the fundamental
+    63→  let noiseSource: AudioBufferSourceNode | null = null;
+    64→  if (params.noiseAmount &gt; 0.01) {
+    65→    const noiseBuffer = createNoiseBuffer(ctx, 0.5);
+    66→    noiseSource = ctx.createBufferSource();
+    67→    noiseSource.buffer = noiseBuffer;
+    68→    noiseSource.loop = true;
+    69→
+    70→    const noiseGain = ctx.createGain();
+    71→    // More noise at high velocity
+    72→    noiseGain.gain.value = params.noiseAmount * (1 + velocity * 2);
+    73→
+    74→    const noiseBP = ctx.createBiquadFilter();
+    75→    noiseBP.type = &#x27;bandpass&#x27;;
+    76→    noiseBP.frequency.value = baseFreq;
+    77→    noiseBP.Q.value = 2;
+    78→
+    79→    noiseSource.connect(noiseBP);
+    80→    noiseBP.connect(noiseGain);
+    81→    noiseGain.connect(filter);
+    82→    noiseSource.start(now);
+    83→  }
+    84→
+    85→  return {
+    86→    output: voiceGain,
+    87→
+    88→    stop(when?: number) {
+    89→      const t = when ?? ctx.currentTime;
+    90→      const release = params.releaseTime;
+    91→      voiceGain.gain.cancelScheduledValues(t);
+    92→      voiceGain.gain.setValueAtTime(voiceGain.gain.value, t);
+    93→      voiceGain.gain.linearRampToValueAtTime(0, t + release);
+    94→
+    95→      const stopAt = t + release + 0.05;
+    96→      for (const osc of oscs) {
+    97→        try { osc.stop(stopAt); } catch (_) { /* already stopped */ }
+    98→      }
+    99→      if (noiseSource) {
+   100→        try { noiseSource.stop(stopAt); } catch (_) { /* already stopped */ }
+   101→      }
+   102→    },
+   103→
+   104→    updatePosition(newMod: PositionMod) {
+   105→      const t = ctx.currentTime;
+   106→      filter.frequency.linearRampToValueAtTime(
+   107→        params.filterFreq * newMod.filterCutoffMul,
+   108→        t + 0.02,
+   109→      );
+   110→      // Update brightness on upper partials
+   111→      for (let i = 1; i &lt; oscGains.length; i++) {
+   112→        const spec = params.oscillators[i];
+   113→        const brightBoost = newMod.brightness * 0.5;
+   114→        oscGains[i].gain.linearRampToValueAtTime(
+   115→          spec.gainScale * (1 + brightBoost),
+   116→          t + 0.02,
+   117→        );
+   118→      }
+   119→    },
+   120→  };
+   121→}
+   122→
+   123→// Shared noise buffer cache
+   124→let cachedNoiseBuffer: AudioBuffer | null = null;
+   125→
+   126→function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
+   127→  if (cachedNoiseBuffer &amp;&amp; cachedNoiseBuffer.sampleRate === ctx.sampleRate) {
+   128→    return cachedNoiseBuffer;
+   129→  }
+   130→  const length = Math.ceil(ctx.sampleRate * duration);
+   131→  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+   132→  const data = buffer.getChannelData(0);
+   133→  for (let i = 0; i &lt; length; i++) {
+   134→    data[i] = Math.random() * 2 - 1;
+   135→  }
+   136→  cachedNoiseBuffer = buffer;
+   137→  return buffer;
+   138→}
+   139→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-33-615Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-33-615Z" class="timestamp-link"><time datetime="2026-03-23T17:59:33.615Z" data-timestamp="2026-03-23T17:59:33.615Z">2026-03-23T17:59:33.615Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JDUXFyfUnucjKX1jJrWSZm"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/rt/code/personal/soundpaint/index.html&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T17-59-33-621Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T17-59-33-621Z" class="timestamp-link"><time datetime="2026-03-23T17:59:33.621Z" data-timestamp="2026-03-23T17:59:33.621Z">2026-03-23T17:59:33.621Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     1→&lt;!DOCTYPE html&gt;
+     2→&lt;html lang=&quot;en&quot;&gt;
+     3→  &lt;head&gt;
+     4→    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+     5→    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+     6→    &lt;title&gt;Sound Painter&lt;/title&gt;
+     7→    &lt;link rel=&quot;stylesheet&quot; href=&quot;/src/style.css&quot; /&gt;
+     8→  &lt;/head&gt;
+     9→  &lt;body&gt;
+    10→    &lt;div id=&quot;app&quot;&gt;
+    11→      &lt;div class=&quot;toolbar&quot;&gt;
+    12→        &lt;div class=&quot;toolbar-group&quot; id=&quot;color-picker&quot;&gt;&lt;/div&gt;
+    13→        &lt;div class=&quot;toolbar-group&quot; id=&quot;brush-picker&quot;&gt;&lt;/div&gt;
+    14→        &lt;div class=&quot;toolbar-group controls&quot;&gt;
+    15→          &lt;div class=&quot;mode-toggle&quot;&gt;
+    16→            &lt;button id=&quot;btn-live&quot; type=&quot;button&quot; class=&quot;mode-btn active&quot;&gt;Live&lt;/button&gt;
+    17→            &lt;button id=&quot;btn-playhead&quot; type=&quot;button&quot; class=&quot;mode-btn&quot;&gt;Playhead&lt;/button&gt;
+    18→          &lt;/div&gt;
+    19→          &lt;button id=&quot;btn-clear&quot; type=&quot;button&quot;&gt;Clear&lt;/button&gt;
+    20→        &lt;/div&gt;
+    21→      &lt;/div&gt;
+    22→      &lt;canvas id=&quot;canvas&quot;&gt;&lt;/canvas&gt;
+    23→    &lt;/div&gt;
+    24→    &lt;script type=&quot;module&quot; src=&quot;/src/main.ts&quot;&gt;&lt;/script&gt;
+    25→  &lt;/body&gt;
+    26→&lt;/html&gt;
+    27→</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T17-59-37-113Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T17-59-37-113Z" class="timestamp-link"><time datetime="2026-03-23T17:59:37.113Z" data-timestamp="2026-03-23T17:59:37.113Z">2026-03-23T17:59:37.113Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have everything I need. Let me rewrite the playhead as a stroke-replay system and update the UI label.</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-00-15-892Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-00-15-892Z" class="timestamp-link"><time datetime="2026-03-23T18:00:15.892Z" data-timestamp="2026-03-23T18:00:15.892Z">2026-03-23T18:00:15.892Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01UfNM9DqgD6iBVa2hheVt5w">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">playhead.ts</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/src/audio/playhead.ts</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">import type { BrushType, EraserTool, Painting, StrokePoint } from &#39;../types&#39;;
+import { getAudioContext, ensureResumed } from &#39;./engine&#39;;
+import { createVoice, type Voice } from &#39;./voices&#39;;
+import { voiceParamsFromColor, positionMod } from &#39;./mappings&#39;;
+import { getEffectChain } from &#39;./effects&#39;;
+import { debugParams } from &#39;../ui/debug&#39;;
+
+const ERASERS: ReadonlySet&lt;BrushType&gt; = new Set&lt;EraserTool&gt;([&#39;scraper&#39;, &#39;solvent&#39;]);
+const LOOKAHEAD_MS = 80;
+const SCHEDULE_INTERVAL_MS = 30;
+
+export type Playhead = {
+  start: () =&gt; void;
+  stop: () =&gt; void;
+  isPlaying: () =&gt; boolean;
+  getPosition: () =&gt; number;
+};
+
+/**
+ * Stroke-replay playhead: replays each stroke&#39;s recorded trajectory as sound,
+ * in the order the strokes were painted, looping over the painting&#39;s loopLengthMs.
+ *
+ * Each stroke is assigned a time slot proportional to its recorded duration.
+ * Strokes are played sequentially with small gaps between them.
+ */
+export function createPlayhead(
+  getPainting: () =&gt; Painting,
+  onPositionChange: (x: number) =&gt; void,
+): Playhead {
+  let playing = false;
+  let schedulerTimer: ReturnType&lt;typeof setInterval&gt; | null = null;
+  let animFrameId = 0;
+  let loopStartTime = 0;
+
+  // Schedule state
+  type ScheduledStroke = {
+    strokeIndex: number;
+    startOffset: number;   // seconds from loop start
+    duration: number;      // seconds
+    points: readonly StrokePoint[];
+  };
+
+  let schedule: ScheduledStroke[] = [];
+  let nextEvent: { strokeIdx: number; pointIdx: number } = { strokeIdx: 0, pointIdx: 0 };
+
+  // Track active voices for cleanup and voice stealing
+  type ActiveReplayVoice = {
+    voice: Voice;
+    stopTime: number;
+  };
+  const activeVoices: ActiveReplayVoice[] = [];
+
+  function buildSchedule(): ScheduledStroke[] {
+    const painting = getPainting();
+    const loopDur = painting.loopLengthMs / 1000;
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+
+    if (strokes.length === 0) return [];
+
+    // Measure each stroke&#39;s recorded duration
+    const rawDurations = strokes.map((s) =&gt; {
+      const pts = s.points;
+      return Math.max(pts[pts.length - 1].timestamp - pts[0].timestamp, 50) / 1000;
+    });
+    const totalRawDur = rawDurations.reduce((a, b) =&gt; a + b, 0);
+
+    // Gap between strokes: 5% of loop time, split evenly
+    const totalGap = loopDur * 0.05;
+    const gapPerStroke = strokes.length &gt; 1 ? totalGap / (strokes.length - 1) : 0;
+    const availableTime = loopDur - totalGap;
+
+    // Scale each stroke&#39;s duration proportionally to fill available time
+    const result: ScheduledStroke[] = [];
+    let offset = 0;
+    for (let i = 0; i &lt; strokes.length; i++) {
+      const scaledDur = (rawDurations[i] / totalRawDur) * availableTime;
+      result.push({
+        strokeIndex: i,
+        startOffset: offset,
+        duration: scaledDur,
+        points: strokes[i].points,
+      });
+      offset += scaledDur + gapPerStroke;
+    }
+
+    return result;
+  }
+
+  function getLoopDuration(): number {
+    return getPainting().loopLengthMs / 1000;
+  }
+
+  /** Returns position within current loop in seconds */
+  function loopPosition(): number {
+    const ctx = getAudioContext();
+    const elapsed = ctx.currentTime - loopStartTime;
+    const loopDur = getLoopDuration();
+    return elapsed % loopDur;
+  }
+
+  function triggerStrokeVoice(
+    ss: ScheduledStroke,
+    pointIdx: number,
+    when: number,
+  ) {
+    const painting = getPainting();
+    const strokes = painting.strokes.filter((s) =&gt; !ERASERS.has(s.brush) &amp;&amp; s.points.length &gt;= 2);
+    const stroke = strokes[ss.strokeIndex];
+    if (!stroke) return;
+
+    const point = ss.points[pointIdx];
+    const params = voiceParamsFromColor(stroke.color);
+    const mod = positionMod(point);
+
+    // Voice stealing
+    while (activeVoices.length &gt;= debugParams.maxVoices) {
+      const oldest = activeVoices.shift()!;
+      oldest.voice.stop();
+    }
+
+    const voice = createVoice(params, mod, point.pressure);
+    const chain = getEffectChain(stroke.brush);
+    voice.output.connect(chain.input);
+
+    // Voice duration: time until next point, scaled to scheduled duration
+    const rawDur = (ss.points[ss.points.length - 1].timestamp - ss.points[0].timestamp) / 1000;
+    const timeScale = rawDur &gt; 0 ? ss.duration / rawDur : 1;
+    let voiceDur: number;
+    if (pointIdx &lt; ss.points.length - 1) {
+      voiceDur = ((ss.points[pointIdx + 1].timestamp - point.timestamp) / 1000) * timeScale;
+      voiceDur = Math.max(voiceDur, 0.02);
+    } else {
+      voiceDur = 0.08; // last point — short tail
+    }
+
+    const stopTime = when + voiceDur * debugParams.voiceOverlap;
+    voice.stop(stopTime);
+    activeVoices.push({ voice, stopTime });
+  }
+
+  function scheduleAhead() {
+    if (schedule.length === 0) return;
+
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const loopDur = getLoopDuration();
+    const lookahead = LOOKAHEAD_MS / 1000;
+
+    // Figure out where we are in the loop
+    const elapsed = now - loopStartTime;
+    const loopIter = Math.floor(elapsed / loopDur);
+    const loopBase = loopStartTime + loopIter * loopDur;
+
+    // Walk through schedule and trigger anything within the lookahead window
+    for (let si = nextEvent.strokeIdx; si &lt; schedule.length; si++) {
+      const ss = schedule[si];
+      const rawDur = (ss.points[ss.points.length - 1].timestamp - ss.points[0].timestamp) / 1000;
+      const timeScale = rawDur &gt; 0 ? ss.duration / rawDur : 1;
+
+      const startPt = si === nextEvent.strokeIdx ? nextEvent.pointIdx : 0;
+      for (let pi = startPt; pi &lt; ss.points.length; pi++) {
+        // When should this point play?
+        const pointOffsetInStroke = ((ss.points[pi].timestamp - ss.points[0].timestamp) / 1000) * timeScale;
+        let absTime = loopBase + ss.startOffset + pointOffsetInStroke;
+
+        // If it&#39;s already past in this loop iteration, try next
+        if (absTime &lt; now - 0.01) {
+          absTime += loopDur;
+        }
+
+        if (absTime &gt; now + lookahead) {
+          // Save position for next scheduling pass
+          nextEvent = { strokeIdx: si, pointIdx: pi };
+          return;
+        }
+
+        if (absTime &gt;= now - 0.01) {
+          triggerStrokeVoice(ss, pi, Math.max(absTime, now));
+        }
+      }
+    }
+
+    // We&#39;ve reached the end of the schedule — wrap to next loop
+    nextEvent = { strokeIdx: 0, pointIdx: 0 };
+    loopStartTime = loopBase + loopDur;
+
+    // Cleanup finished voices
+    const cutoff = now - 0.5;
+    for (let i = activeVoices.length - 1; i &gt;= 0; i--) {
+      if (activeVoices[i].stopTime &lt; cutoff) {
+        activeVoices.splice(i, 1);
+      }
+    }
+  }
+
+  function updateVisual() {
+    if (!playing) return;
+    const loopDur = getLoopDuration();
+    const pos = loopPosition();
+
+    // Find which stroke is currently playing and use its average X for the playhead
+    let visualX = pos / loopDur; // fallback: linear sweep
+
+    for (const ss of schedule) {
+      if (pos &gt;= ss.startOffset &amp;&amp; pos &lt;= ss.startOffset + ss.duration) {
+        // We&#39;re inside this stroke — interpolate X from its points
+        const t = (pos - ss.startOffset) / ss.duration;
+        const pi = Math.min(Math.floor(t * (ss.points.length - 1)), ss.points.length - 1);
+        visualX = ss.points[pi].x;
+        break;
+      }
+    }
+
+    onPositionChange(visualX);
+    animFrameId = requestAnimationFrame(updateVisual);
+  }
+
+  function stopAllVoices() {
+    for (const v of activeVoices) {
+      v.voice.stop();
+    }
+    activeVoices.length = 0;
+  }
+
+  return {
+    start() {
+      if (playing) return;
+      playing = true;
+      void ensureResumed();
+
+      schedule = buildSchedule();
+      nextEvent = { strokeIdx: 0, pointIdx: 0 };
+
+      const ctx = getAudioContext();
+      loopStartTime = ctx.currentTime;
+
+      schedulerTimer = setInterval(scheduleAhead, SCHEDULE_INTERVAL_MS);
+      scheduleAhead();
+      animFrameId = requestAnimationFrame(updateVisual);
+    },
+
+    stop() {
+      if (!playing) return;
+      playing = false;
+      if (schedulerTimer !== null) {
+        clearInterval(schedulerTimer);
+        schedulerTimer = null;
+      }
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = 0;
+      }
+      stopAllVoices();
+      schedule = [];
+      onPositionChange(-1);
+    },
+
+    isPlaying: () =&gt; playing,
+    getPosition() {
+      if (!playing) return 0;
+      return loopPosition() / getLoopDuration();
+    },
+  };
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-00-15-901Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-00-15-901Z" class="timestamp-link"><time datetime="2026-03-23T18:00:15.901Z" data-timestamp="2026-03-23T18:00:15.901Z">2026-03-23T18:00:15.901Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/src/audio/playhead.ts has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-00-18-766Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-00-18-766Z" class="timestamp-link"><time datetime="2026-03-23T18:00:18.766Z" data-timestamp="2026-03-23T18:00:18.766Z">2026-03-23T18:00:18.766Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the UI label from "Playhead" to "Replay":</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-00-20-592Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-00-20-592Z" class="timestamp-link"><time datetime="2026-03-23T18:00:20.592Z" data-timestamp="2026-03-23T18:00:20.592Z">2026-03-23T18:00:20.592Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011EeqEobyr5dV8WY5bDSzsJ">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">index.html</span></div>
+<div class="file-tool-fullpath">/Users/rt/code/personal/soundpaint/index.html</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">            &lt;button id=&#34;btn-playhead&#34; type=&#34;button&#34; class=&#34;mode-btn&#34;&gt;Playhead&lt;/button&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">            &lt;button id=&#34;btn-playhead&#34; type=&#34;button&#34; class=&#34;mode-btn&#34;&gt;Replay&lt;/button&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-00-20-598Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-00-20-598Z" class="timestamp-link"><time datetime="2026-03-23T18:00:20.598Z" data-timestamp="2026-03-23T18:00:20.598Z">2026-03-23T18:00:20.598Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/rt/code/personal/soundpaint/index.html has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-00-23-374Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-00-23-374Z" class="timestamp-link"><time datetime="2026-03-23T18:00:23.374Z" data-timestamp="2026-03-23T18:00:23.374Z">2026-03-23T18:00:23.374Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me verify the build compiles:</p></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-00-23-870Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-00-23-870Z" class="timestamp-link"><time datetime="2026-03-23T18:00:23.870Z" data-timestamp="2026-03-23T18:00:23.870Z">2026-03-23T18:00:23.870Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VZ7iNTSSP8RNEfzGLQjFqF">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Type-check the project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">npx tsc --noEmit 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-03-23T18-08-38-768Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-03-23T18-08-38-768Z" class="timestamp-link"><time datetime="2026-03-23T18:08:38.768Z" data-timestamp="2026-03-23T18:08:38.768Z">2026-03-23T18:08:38.768Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-03-23T18-08-46-629Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-03-23T18-08-46-629Z" class="timestamp-link"><time datetime="2026-03-23T18:08:46.629Z" data-timestamp="2026-03-23T18:08:46.629Z">2026-03-23T18:08:46.629Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Clean compile. Here's what the new replay system does:</p>
+<p><strong>Stroke replay instead of column scanning</strong> — when you hit Replay, it plays back each stroke's recorded trajectory as sound, in the order they were painted:</p>
+<ul>
+<li>Each stroke gets a time slot proportional to its original duration, scaled to fill the 4-second loop</li>
+<li>Points within each stroke trigger voices following the recorded path — so a fast stroke sounds fast, a slow one sounds slow</li>
+<li>Small gaps (5% of loop time) separate strokes for clarity</li>
+<li>The visual playhead follows the X position of the currently-replaying stroke instead of sweeping linearly</li>
+<li>Voice stealing and overlap controls from the debug panel still apply</li>
+<li>Eraser strokes are skipped (no sound)</li>
+</ul>
+<p>This should sound dramatically less cacophonous since voices trigger sequentially (one stroke at a time) rather than all strokes at every column simultaneously.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-005.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<span class="current">6</span>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-012.html">12</a>
+<a href="page-013.html">13</a>
+<a href="page-014.html">14</a>
+<a href="page-007.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

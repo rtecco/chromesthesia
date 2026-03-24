@@ -1,8 +1,12 @@
 # Chromesthesia
 
-An audio toy where painting on a 2D canvas creates sound. Color determines timbre, brush type applies effects, and position modulates tone.
+An audio toy where painting on a 2D canvas creates sound.
 
 **Try it:** [https://rtecco.github.io/chromesthesia/](https://rtecco.github.io/chromesthesia/)
+
+[Motivation and Design Decisions](RATIONALE.md)
+
+[Claude Session Transcript](claude-transcript/index.html)
 
 ## How it works
 
@@ -13,7 +17,7 @@ Every brush stroke generates sound in real time. The mapping from paint to audio
 - **Brush**: Each brush type runs through a different effect chain — reverb, chorus, distortion + slap delay, or tremolo.
 - **Erasers**: Scraper and solvent remove paint visually and suppress erased strokes from replay.
 
-## UI
+### UI
 
 - **Palette**: 5 default colors + 3 empty slots. Click to select, double-click to edit or fill an empty slot.
 - **Brushes**: Oil Flat, Oil Round, Palette Knife, Dry Brush — each with distinct stroke feel and audio effect.
@@ -27,7 +31,7 @@ Every brush stroke generates sound in real time. The mapping from paint to audio
 
 Vanilla TypeScript + Vite. No frameworks, no audio libraries — all synthesis is Web Audio API. Canvas2D with an offscreen buffer for stroke compositing.
 
-## Local development
+### Local development
 
 ```bash
 git clone https://github.com/rtecco/chromesthesia.git
@@ -36,7 +40,7 @@ npm install
 npm run dev
 ```
 
-## Build
+### Build
 
 ```bash
 npm run build
